@@ -13,6 +13,21 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_PASSWORD: stopmining
+          POPOSTGRES_DB: data
+          STGRES_USER: admni
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - uses: actions/checkout@v3
 
@@ -20,6 +35,9 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: 1.19
+
+    - name: Migrations
+      run: make migrate_up
 
     - name: Tests
       run: make tests
