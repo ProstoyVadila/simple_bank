@@ -22,7 +22,7 @@ where to_account_id = $1
 order by created_at;
 
 
--- name: GetAllTransfers :many
+-- name: ListTransfers :many
 select * from transfers
 order by created_at
 limit $1

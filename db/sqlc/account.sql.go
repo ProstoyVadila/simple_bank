@@ -11,6 +11,31 @@ import (
 	"github.com/google/uuid"
 )
 
+const addAccountBalance = `-- name: AddAccountBalance :one
+update accounts 
+set balance = balance + $1
+where id = $2
+returning id, owner_name, balance, currency, created_at
+`
+
+type AddAccountBalanceParams struct {
+	Amount int64     `json:"amount"`
+	ID     uuid.UUID `json:"id"`
+}
+
+func (q *Queries) AddAccountBalance(ctx context.Context, arg AddAccountBalanceParams) (Account, error) {
+	row := q.db.QueryRowContext(ctx, addAccountBalance, arg.Amount, arg.ID)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerName,
+		&i.Balance,
+		&i.Currency,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const createAccount = `-- name: CreateAccount :one
 insert into accounts (
     owner_name,
@@ -57,6 +82,24 @@ where id = $1
 
 func (q *Queries) GetAccount(ctx context.Context, id uuid.UUID) (Account, error) {
 	row := q.db.QueryRowContext(ctx, getAccount, id)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerName,
+		&i.Balance,
+		&i.Currency,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getAccountForUpdate = `-- name: GetAccountForUpdate :one
+select id, owner_name, balance, currency, created_at from accounts
+where id = $1 for no key update
+`
+
+func (q *Queries) GetAccountForUpdate(ctx context.Context, id uuid.UUID) (Account, error) {
+	row := q.db.QueryRowContext(ctx, getAccountForUpdate, id)
 	var i Account
 	err := row.Scan(
 		&i.ID,

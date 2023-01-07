@@ -15,7 +15,7 @@ select * from entries
 where account_id = $1
 order by created_at;
 
--- name: ListAllEntries :many
+-- name: ListEntries :many
 select * from entries
 order by created_at
 limit $1
@@ -24,9 +24,13 @@ offset $2;
 -- name: UpdateEntry :one
 update entries
 set amount = $2
-where account_id = $1
+where id = $1
 returning *;
 
 -- name: DeleteEntry :exec
+delete from entries
+where id = $1;
+
+-- name: DeleteEntriesByAccount :exec
 delete from entries
 where account_id = $1;

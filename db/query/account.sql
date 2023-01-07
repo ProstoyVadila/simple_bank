@@ -11,6 +11,10 @@ insert into accounts (
 select * from accounts
 where id = $1;
 
+-- name: GetAccountForUpdate :one
+select * from accounts
+where id = $1 for no key update;
+
 -- name: ListAccounts :many
 select * from accounts
 order by created_at
@@ -21,6 +25,12 @@ offset $2;
 update accounts 
 set balance = $2
 where id = $1
+returning *;
+
+-- name: AddAccountBalance :one
+update accounts 
+set balance = balance + sqlc.arg(amount)
+where id = sqlc.arg(id)
 returning *;
 
 -- name: DeleteAccount :exec

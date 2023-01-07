@@ -43,9 +43,9 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 
 // TransferTxParams contains the input params if the transfer tansaction
 type TransferTxParams struct {
-	FromAccountID uuid.UUID `json:"from_account_id"`
-	ToAccountID   uuid.UUID `json:"to_account_id"`
-	Amount        int64     `json:"amount"`
+	FromAccount Account `json:"from_account"`
+	ToAccount   Account `json:"to_account"`
+	Amount      int64   `json:"amount"`
 }
 
 // TransferTxResult is the result of the transfer transaction
@@ -65,8 +65,8 @@ func (store *Store) TransferTx(ctx context.Context, args TransferTxParams) (Tran
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{
-			FromAccountID: args.FromAccountID,
-			ToAccountID:   args.ToAccountID,
+			FromAccountID: args.FromAccount.ID,
+			ToAccountID:   args.ToAccount.ID,
 			Amount:        args.Amount,
 		})
 		if err != nil {
@@ -74,24 +74,72 @@ func (store *Store) TransferTx(ctx context.Context, args TransferTxParams) (Tran
 		}
 
 		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
-			AccountID: args.FromAccountID,
+			AccountID: args.FromAccount.ID,
 			Amount:    -args.Amount,
 		})
 		if err != nil {
 			return err
 		}
 		result.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{
-			AccountID: args.ToAccountID,
+			AccountID: args.ToAccount.ID,
 			Amount:    args.Amount,
 		})
 		if err != nil {
 			return err
 		}
 
-		// TODO(vadim): update accounts' balance
+		//  TODO: find out a better way
+		// Avoiding the db deadlock on a cuncurrent "A -> B, B -> A" selecting/updateting
+		if args.FromAccount.CreatedAt.Before(args.ToAccount.CreatedAt) {
+			result.FromAccount, result.ToAccount, err = transferMoney(
+				ctx,
+				q,
+				args.FromAccount.ID,
+				args.ToAccount.ID,
+				-args.Amount,
+				args.Amount,
+			)
+			if err != nil {
+				return err
+			}
+		} else {
+			result.ToAccount, result.FromAccount, err = transferMoney(
+				ctx,
+				q,
+				args.ToAccount.ID,
+				args.FromAccount.ID,
+				args.Amount,
+				-args.Amount,
+			)
+			if err != nil {
+				return err
+			}
+		}
 
 		return nil
 	})
 
 	return result, err
+}
+
+func transferMoney(
+	ctx context.Context,
+	q *Queries,
+	account1ID,
+	account2ID uuid.UUID,
+	amount1,
+	amount2 int64,
+) (account1, account2 Account, err error) {
+	account1, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+		ID:     account1ID,
+		Amount: amount1,
+	})
+	if err != nil {
+		return
+	}
+	account2, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+		ID:     account2ID,
+		Amount: amount2,
+	})
+	return
 }

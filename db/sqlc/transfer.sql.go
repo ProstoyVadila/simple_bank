@@ -40,47 +40,6 @@ func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) 
 	return i, err
 }
 
-const getAllTransfers = `-- name: GetAllTransfers :many
-select id, from_account_id, to_account_id, amount, created_at from transfers
-order by created_at
-limit $1
-offset $2
-`
-
-type GetAllTransfersParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
-}
-
-func (q *Queries) GetAllTransfers(ctx context.Context, arg GetAllTransfersParams) ([]Transfer, error) {
-	rows, err := q.db.QueryContext(ctx, getAllTransfers, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Transfer
-	for rows.Next() {
-		var i Transfer
-		if err := rows.Scan(
-			&i.ID,
-			&i.FromAccountID,
-			&i.ToAccountID,
-			&i.Amount,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getTransfersByFromAccount = `-- name: GetTransfersByFromAccount :many
 select id, from_account_id, to_account_id, amount, created_at from transfers
 where from_account_id = $1
@@ -167,4 +126,45 @@ func (q *Queries) GetTrasfer(ctx context.Context, id uuid.UUID) (Transfer, error
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const listTransfers = `-- name: ListTransfers :many
+select id, from_account_id, to_account_id, amount, created_at from transfers
+order by created_at
+limit $1
+offset $2
+`
+
+type ListTransfersParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListTransfers(ctx context.Context, arg ListTransfersParams) ([]Transfer, error) {
+	rows, err := q.db.QueryContext(ctx, listTransfers, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Transfer
+	for rows.Next() {
+		var i Transfer
+		if err := rows.Scan(
+			&i.ID,
+			&i.FromAccountID,
+			&i.ToAccountID,
+			&i.Amount,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
