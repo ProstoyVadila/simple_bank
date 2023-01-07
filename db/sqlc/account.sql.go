@@ -48,8 +48,8 @@ insert into accounts (
 
 type CreateAccountParams struct {
 	OwnerName string `json:"owner_name"`
-	Balance   int64  `json:"balance"`
 	Currency  string `json:"currency"`
+	Balance   int64  `json:"balance"`
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {

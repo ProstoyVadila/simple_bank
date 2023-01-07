@@ -18,4 +18,10 @@ sqlc:
 tests:
 	go test -v -cover ./...
 
-.PHONY: postgres createdb dropdb recreate_db psql sqlc migrate_up mgirate_down
+fieldalignment:
+	fieldalignment -fix ./... 
+
+server:
+	go run main.go 
+
+.PHONY: postgres createdb dropdb recreate_db psql sqlc migrate_up mgirate_down fieldalignment server
