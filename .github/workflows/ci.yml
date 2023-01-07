@@ -21,6 +21,8 @@ jobs:
           POSTGRES_PASSWORD: stopmining
           POPOSTGRES_DB: data
           STGRES_USER: admni
+        ports:
+          - 5432:5432
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
