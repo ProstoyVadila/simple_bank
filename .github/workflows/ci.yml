@@ -19,7 +19,7 @@ jobs:
         image: postgres:14-alpine
         env:
           POSTGRES_PASSWORD: stopmining
-          POPOSTGRES_DB: data
+          POSTGRES_DB: data
           POSTGRES_USER: admni
         ports:
           - 5432:5432
