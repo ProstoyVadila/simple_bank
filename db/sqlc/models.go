@@ -11,26 +11,24 @@ import (
 )
 
 type Account struct {
-	ID        uuid.UUID `json:"id"`
-	OwnerName string    `json:"owner_name"`
-	Balance   int64     `json:"balance"`
-	Currency  string    `json:"currency"`
 	CreatedAt time.Time `json:"created_at"`
+	OwnerName string    `json:"owner_name"`
+	Currency  string    `json:"currency"`
+	Balance   int64     `json:"balance"`
+	ID        uuid.UUID `json:"id"`
 }
 
 type Entry struct {
+	CreatedAt time.Time `json:"created_at"`
+	Amount    int64     `json:"amount"`
 	ID        uuid.UUID `json:"id"`
 	AccountID uuid.UUID `json:"account_id"`
-	// can be negative or positive
-	Amount    int64     `json:"amount"`
-	CreatedAt time.Time `json:"created_at"`
 }
 
 type Transfer struct {
+	CreatedAt     time.Time `json:"created_at"`
+	Amount        int64     `json:"amount"`
 	ID            uuid.UUID `json:"id"`
 	FromAccountID uuid.UUID `json:"from_account_id"`
 	ToAccountID   uuid.UUID `json:"to_account_id"`
-	// must be positive
-	Amount    int64     `json:"amount"`
-	CreatedAt time.Time `json:"created_at"`
 }
