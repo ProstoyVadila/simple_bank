@@ -9,17 +9,23 @@ import (
 )
 
 // Store provides an execution of queries and transactions
-type Store struct {
+type Store interface {
+	Querier
+	TransferTx(ctx context.Context, args TransferTxParams) (TransferTxResult, error)
+}
+
+// SQLStore provides an execution of queries and transactions
+type SQLStore struct {
 	*Queries
 	db *sql.DB
 }
 
-func NewStore(db *sql.DB) *Store {
-	return &Store{db: db, Queries: New(db)}
+func NewStore(db *sql.DB) *SQLStore {
+	return &SQLStore{db: db, Queries: New(db)}
 }
 
 // execTx executes a func within a database transaction
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	// TODO(vadim): figure out with isolation levels in sqlc framework
 	tx, err := store.db.BeginTx(
 		ctx,
@@ -59,7 +65,7 @@ type TransferTxResult struct {
 
 // TransferTx provides a money transfer between accounts.
 // It creates a transfer record, adds account etries, and updates accounts' balance in one transaction.
-func (store *Store) TransferTx(ctx context.Context, args TransferTxParams) (TransferTxResult, error) {
+func (store *SQLStore) TransferTx(ctx context.Context, args TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
