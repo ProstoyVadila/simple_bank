@@ -6,25 +6,25 @@ import (
 
 	"github.com/ProstoyVadila/simple_bank/api"
 	db "github.com/ProstoyVadila/simple_bank/db/sqlc"
+	"github.com/ProstoyVadila/simple_bank/utils"
 
 	_ "github.com/lib/pq"
 )
 
-const (
-	dbDriver      = "postgres"
-	dbSource      = "postgresql://admni:stopmining@localhost:5432/data?sslmode=disable"
-	serverAddress = "localhost:8080"
-)
-
 func main() {
-	conn, err := sql.Open(dbDriver, dbSource)
+	config, err := utils.LoadConfig(".")
+	if err != nil {
+		log.Fatal("Can't load config file", err)
+	}
+
+	conn, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal("Can't connect to db", err)
 	}
 
 	store := db.NewStore(conn)
 	server := api.NewServer(store)
-	err = server.Start(serverAddress)
+	err = server.Start(config.ServerAddress)
 	if err != nil {
 		log.Fatal("Can't start server", err)
 	}

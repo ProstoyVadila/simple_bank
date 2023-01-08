@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	db "github.com/ProstoyVadila/simple_bank/db/sqlc"
+	"github.com/ProstoyVadila/simple_bank/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type createAccountRequest struct {
@@ -37,14 +37,7 @@ func (s *Server) createAccount(ctx *gin.Context) {
 }
 
 type getAccountRequest struct {
-	ID string `uri:"id" binding:"required,uuid"`
-}
-
-// UUID helps to convert ID string to uuid.UUID bc of gin validation bug
-func (g *getAccountRequest) UUID() uuid.UUID {
-	// Can ignore error (gin had already validated field as uuid)
-	id, _ := uuid.Parse(g.ID)
-	return id
+	ID utils.UUIDString `uri:"id" json:"id" binding:"required,uuid"`
 }
 
 func (s *Server) getAccount(ctx *gin.Context) {
@@ -54,7 +47,9 @@ func (s *Server) getAccount(ctx *gin.Context) {
 		return
 	}
 
-	account, err := s.store.GetAccount(ctx, req.UUID())
+	// Can ignore error bc gin binds field as uuid type
+	id, _ := req.ID.UUID()
+	account, err := s.store.GetAccount(ctx, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
@@ -90,4 +85,22 @@ func (s *Server) listAccount(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, accounts)
+}
+
+type deleteAccountRequest struct {
+	ID utils.UUIDString `uri:"id" binding:"required,uuid"`
+}
+
+func (s *Server) deleteAccount(ctx *gin.Context) {
+	var req deleteAccountRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+	}
+
+	id, _ := req.ID.UUID()
+	err := s.store.DeleteAccount(ctx, id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
+	ctx.JSON(http.StatusOK, req)
 }
