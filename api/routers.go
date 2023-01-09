@@ -10,5 +10,7 @@ func routes(s *Server) *gin.Engine {
 	router.GET("/accounts", s.listAccount)
 	router.DELETE("/accouts/:id", s.deleteAccount)
 
+	router.POST("/transfers", s.createTransfer)
+
 	return router
 }

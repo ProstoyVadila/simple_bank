@@ -96,6 +96,7 @@ func (store *SQLStore) TransferTx(ctx context.Context, args TransferTxParams) (T
 		if err = utils.ValidateCurrency(args.Currency, fromAccount.Currency, toAccount.Currency); err != nil {
 			return err
 		}
+		result.Currency = args.Currency
 
 		// Creating a entries records
 		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{

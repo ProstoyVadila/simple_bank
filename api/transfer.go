@@ -5,27 +5,30 @@ import (
 
 	db "github.com/ProstoyVadila/simple_bank/db/sqlc"
 	"github.com/ProstoyVadila/simple_bank/e"
+	"github.com/ProstoyVadila/simple_bank/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type transferRequest struct {
-	FromAccountID uuid.UUID `json:"from_account_id" binding:"required,uuid"`
-	ToAccountID   uuid.UUID `json:"to_account_id" binding:"required,uuid"`
-	Amount        int64     `json:"amount" binding:"required,gt=0"`
-	Currency      string    `json:"currency" binding:"required,oneof=PHP KZT USD"`
+	FromAccountID utils.UUIDString `json:"from_account_id" binding:"required,uuid"`
+	ToAccountID   utils.UUIDString `json:"to_account_id" binding:"required,uuid"`
+	Amount        int64            `json:"amount" binding:"required,gt=0"`
+	Currency      string           `json:"currency" binding:"required,oneof=PHP KZT USD"`
 }
 
-func (s *Server) CreateTransfer(ctx *gin.Context) {
+func (s *Server) createTransfer(ctx *gin.Context) {
 	var req transferRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
+	fromAccountID, _ := req.FromAccountID.UUID()
+	toAccountID, _ := req.ToAccountID.UUID()
+
 	args := db.TransferTxParams{
-		FromAccountID: req.FromAccountID,
-		ToAccountID:   req.ToAccountID,
+		FromAccountID: fromAccountID,
+		ToAccountID:   toAccountID,
 		Amount:        req.Amount,
 		Currency:      req.Currency,
 	}
