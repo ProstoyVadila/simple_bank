@@ -22,6 +22,10 @@ fieldalignment:
 	fieldalignment -fix ./... 
 
 server:
-	go run main.go 
+	go run main.go
 
-.PHONY: postgres createdb dropdb recreate_db psql sqlc migrate_up mgirate_down fieldalignment server
+gen_mocks:
+	mockgen -build_flags=--mod=mod -package mockdb -destination db/mock/store.go github.com/ProstoyVadila/simple_bank/db/sqlc Store
+
+
+.PHONY: postgres createdb dropdb recreate_db psql sqlc migrate_up mgirate_down fieldalignment server gen_mocks
