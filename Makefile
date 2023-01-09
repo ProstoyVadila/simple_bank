@@ -26,7 +26,7 @@ fieldalignment:
 server:
 	go run main.go
 
-gen_mocks:
+mocks:
 	mockgen -build_flags=--mod=mod -package mockdb -destination db/mock/store.go github.com/ProstoyVadila/simple_bank/db/sqlc Store
 
 

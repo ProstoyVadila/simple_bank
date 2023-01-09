@@ -48,7 +48,11 @@ func (s *Server) getAccount(ctx *gin.Context) {
 	}
 
 	// Can ignore error bc gin binds field as uuid type
-	id, _ := req.ID.UUID()
+	id, err := req.ID.UUID()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+	}
+
 	account, err := s.store.GetAccount(ctx, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -97,8 +101,11 @@ func (s *Server) deleteAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 	}
 
-	id, _ := req.ID.UUID()
-	err := s.store.DeleteAccount(ctx, id)
+	id, err := req.ID.UUID()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+	}
+	err = s.store.DeleteAccount(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 	}
