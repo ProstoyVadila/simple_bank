@@ -12,8 +12,10 @@ migrate_up:
 mgirate_down:
 	@migrate -path db/migrations -database 'postgresql://admni:stopmining@localhost:5432/data?sslmode=disable' -verbose down
 
-sqlc:
+gen_sqlc:
 	sqlc generate
+
+sqlc: gen_sqlc fieldalignment
 
 tests:
 	go test -v -cover ./...
@@ -28,4 +30,4 @@ gen_mocks:
 	mockgen -build_flags=--mod=mod -package mockdb -destination db/mock/store.go github.com/ProstoyVadila/simple_bank/db/sqlc Store
 
 
-.PHONY: postgres createdb dropdb recreate_db psql sqlc migrate_up mgirate_down fieldalignment server gen_mocks
+.PHONY: postgres createdb dropdb recreate_db psql sqlc migrate_up mgirate_down fieldalignment server gen_mocks gen_sqlc
