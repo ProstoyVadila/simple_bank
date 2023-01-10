@@ -11,12 +11,10 @@ require (
 	github.com/lib/pq v1.10.7
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.1
+	golang.org/x/time v0.3.0
 )
 
-require (
-	github.com/mattn/go-colorable v0.1.12 // indirect
-	golang.org/x/time v0.3.0 // indirect
-)
+require github.com/mattn/go-colorable v0.1.12 // indirect
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

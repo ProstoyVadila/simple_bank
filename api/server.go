@@ -11,11 +11,6 @@ const (
 	maxBurstSize    = 20
 )
 
-type ApiError struct {
-	Field string
-	Msg   string
-}
-
 type Server struct {
 	store  db.Store
 	router *gin.Engine
@@ -24,24 +19,16 @@ type Server struct {
 func NewServer(store db.Store) *Server {
 	server := &Server{store: store}
 	server.router = gin.New()
-
 	server.setMiddlewares()
 	server.setRoutes()
-
 	// register various validators for gin
-	registerValidators()
-
+	setValidators()
 	return server
 }
 
 // Start http server
 func (s *Server) Start(address string) error {
 	return s.router.Run(address)
-}
-
-// errorResponse wraps error messages
-func errorResponse(err error) gin.H {
-	return gin.H{"error": err.Error()}
 }
 
 // setMiddlewares adds middlewares to router
