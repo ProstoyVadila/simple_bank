@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	db "github.com/ProstoyVadila/simple_bank/db/sqlc"
-	"github.com/ProstoyVadila/simple_bank/e"
 	"github.com/ProstoyVadila/simple_bank/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -19,7 +18,7 @@ type transferRequest struct {
 func (s *Server) createTransfer(ctx *gin.Context) {
 	var req transferRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		respondWithValidationError(ctx, err)
+		ctx.Error(err)
 		return
 	}
 
@@ -34,14 +33,16 @@ func (s *Server) createTransfer(ctx *gin.Context) {
 	}
 	result, err := s.store.TransferTx(ctx, args)
 	if err != nil {
-		switch err.(type) {
-		case e.ErrInvalidCurrencyType:
-			ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		case e.ErrAccountNotFound:
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-		default:
-			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		}
+		// TODO: figure out with my custom errors in db api
+		// switch err.(type) {
+		// case e.ErrInvalidCurrencyType:
+		// 	ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		// case e.ErrAccountNotFound:
+		// 	ctx.JSON(http.StatusNotFound, errorResponse(err))
+		// default:
+		// 	ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		// }
+		ctx.Error(err)
 		return
 	}
 

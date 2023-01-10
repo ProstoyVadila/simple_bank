@@ -19,10 +19,11 @@ type Server struct {
 func NewServer(store db.Store) *Server {
 	server := &Server{store: store}
 	server.router = gin.New()
+
 	server.setMiddlewares()
 	server.setRoutes()
-	// register various validators for gin
-	setValidators()
+	server.setValidators()
+
 	return server
 }
 
@@ -38,5 +39,11 @@ func (s *Server) setMiddlewares() {
 		middleware.DefaultLogger(),
 		middleware.CORS(),
 		middleware.Throttling(maxEventsPerSec, maxBurstSize),
+		middleware.Errors(),
 	)
+}
+
+// errorResponse wraps error messages
+func errorResponse(err error) gin.H {
+	return gin.H{"error": err.Error()}
 }

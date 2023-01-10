@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 
 	db "github.com/ProstoyVadila/simple_bank/db/sqlc"
@@ -18,7 +19,9 @@ type createAccountRequest struct {
 func (s *Server) createAccount(ctx *gin.Context) {
 	var req createAccountRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		respondWithValidationError(ctx, err)
+		// respondWithValidationError(ctx, err)
+		ctx.Error(err)
+		fmt.Println("ERROR!!", err.Error())
 		return
 	}
 
@@ -29,7 +32,8 @@ func (s *Server) createAccount(ctx *gin.Context) {
 	}
 	account, err := s.store.CreateAccount(ctx, args)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		// ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.Error(err)
 		return
 	}
 
@@ -43,7 +47,7 @@ type getAccountRequest struct {
 func (s *Server) getAccount(ctx *gin.Context) {
 	var req getAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		respondWithValidationError(ctx, err)
+		ctx.Error(err)
 		return
 	}
 
@@ -59,7 +63,7 @@ func (s *Server) getAccount(ctx *gin.Context) {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 		} else {
-			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			ctx.Error(err)
 		}
 		return
 	}
@@ -75,7 +79,7 @@ type listAccountRequest struct {
 func (s *Server) listAccount(ctx *gin.Context) {
 	var req listAccountRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		respondWithValidationError(ctx, err)
+		ctx.Error(err)
 		return
 	}
 
@@ -85,7 +89,7 @@ func (s *Server) listAccount(ctx *gin.Context) {
 	}
 	accounts, err := s.store.ListAccounts(ctx, args)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.Error(err)
 		return
 	}
 
@@ -99,7 +103,7 @@ type deleteAccountRequest struct {
 func (s *Server) deleteAccount(ctx *gin.Context) {
 	var req deleteAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		respondWithValidationError(ctx, err)
+		ctx.Error(err)
 		return
 	}
 
@@ -110,7 +114,7 @@ func (s *Server) deleteAccount(ctx *gin.Context) {
 	}
 	err = s.store.DeleteAccount(ctx, id)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.Error(err)
 		return
 	}
 	ctx.JSON(http.StatusOK, req)

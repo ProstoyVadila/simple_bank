@@ -7,7 +7,7 @@ import (
 )
 
 // setValidators register custom validators
-func setValidators() {
+func (s *Server) setValidators() {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("currency", isValidCurrency)
 	}
