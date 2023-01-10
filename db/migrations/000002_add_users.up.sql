@@ -7,5 +7,5 @@ create table users (
     created_at timestamptz not null default (now())
 );
 
-alter table accounts add foreign key (owner_name) references users(username);
+alter table accounts add foreign key (owner_name) references users(username) on delete cascade;
 alter table accounts add constraint owner_currency_key unique (owner_name, currency);

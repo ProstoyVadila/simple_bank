@@ -10,9 +10,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func cleanUpAccount(t *testing.T, account Account) {
+	time.Sleep(time.Second)
+	t.Cleanup(func() {
+		err := testQueries.DeleteAccount(context.Background(), account.ID)
+		require.NoError(t, err)
+	})
+	cleanUpUser(t, account.OwnerName)
+}
+
 func createRandomAccount(t *testing.T) Account {
+	user := createRandomUser(t)
 	arg := CreateAccountParams{
-		OwnerName: utils.RandomOwner(),
+		OwnerName: user.Username,
 		Balance:   utils.RandomBalance(),
 		Currency:  "KZT",
 	}
@@ -32,7 +42,8 @@ func createRandomAccount(t *testing.T) Account {
 }
 
 func TestCreateAccount(t *testing.T) {
-	createRandomAccount(t)
+	account := createRandomAccount(t)
+	cleanUpAccount(t, account)
 }
 
 func TestGetAccount(t *testing.T) {
@@ -42,7 +53,7 @@ func TestGetAccount(t *testing.T) {
 	require.NotEmpty(t, account2)
 	require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
 	require.Equal(t, account1, account2)
-
+	cleanUpAccount(t, account1)
 }
 
 func TestUpdateAccount(t *testing.T) {
@@ -61,6 +72,7 @@ func TestUpdateAccount(t *testing.T) {
 
 	require.Equal(t, args.Balance, account2.Balance)
 	require.NotEqual(t, account1.Balance, account2.Balance)
+	cleanUpAccount(t, account1)
 }
 
 func TestDeleteAccount(t *testing.T) {
@@ -75,8 +87,10 @@ func TestDeleteAccount(t *testing.T) {
 }
 
 func TestListAccounts(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		createRandomAccount(t)
+	n := 10
+	accounts1 := make([]Account, n)
+	for i := 0; i < n; i++ {
+		accounts1[i] = createRandomAccount(t)
 	}
 
 	args := ListAccountsParams{
@@ -84,12 +98,15 @@ func TestListAccounts(t *testing.T) {
 		Offset: 5,
 	}
 
-	accounts, err := testQueries.ListAccounts(context.Background(), args)
+	accounts2, err := testQueries.ListAccounts(context.Background(), args)
 	require.NoError(t, err)
-	require.Len(t, accounts, 5)
+	require.Len(t, accounts2, 5)
 
-	for _, acc := range accounts {
+	for _, acc := range accounts2 {
 		require.NotEmpty(t, acc)
+	}
+	for _, account := range accounts1 {
+		cleanUpAccount(t, account)
 	}
 
 }

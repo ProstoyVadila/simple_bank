@@ -10,6 +10,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func cleanUpEntry(t *testing.T, entry Entry, withAcc bool) {
+	t.Cleanup(func() {
+		err := testQueries.DeleteEntry(context.Background(), entry.ID)
+		require.NoError(t, err)
+		if withAcc {
+			err = testQueries.DeleteAccount(context.Background(), entry.AccountID)
+			require.NoError(t, err)
+		}
+	})
+}
+
 func createRandomEntry(t *testing.T, acc Account) Entry {
 	amount := utils.RandomBalance()
 
@@ -26,8 +37,9 @@ func createRandomEntry(t *testing.T, acc Account) Entry {
 	return entry
 }
 
-func TestCreateEnntry(t *testing.T) {
-	createRandomEntry(t, createRandomAccount(t))
+func TestCreateEntry(t *testing.T) {
+	entry := createRandomEntry(t, createRandomAccount(t))
+	cleanUpEntry(t, entry, true)
 }
 
 func TestGetEntry(t *testing.T) {
@@ -37,6 +49,7 @@ func TestGetEntry(t *testing.T) {
 	require.NotEmpty(t, entry2)
 	require.WithinDuration(t, entry1.CreatedAt, entry2.CreatedAt, time.Second)
 	require.Equal(t, entry1, entry2)
+	cleanUpEntry(t, entry1, true)
 }
 
 func TestGetEntriesByAccount(t *testing.T) {
@@ -56,23 +69,33 @@ func TestGetEntriesByAccount(t *testing.T) {
 		require.NotZero(t, entries2[i].CreatedAt)
 		require.Equal(t, entries1[i], entries2[i])
 	}
+	for _, entry := range entries1 {
+		cleanUpEntry(t, entry, false)
+	}
+	cleanUpAccount(t, acc)
 }
 
 func TestListEntries(t *testing.T) {
 	acc := createRandomAccount(t)
-	for i := 0; i < 10; i++ {
-		createRandomEntry(t, acc)
+	n := 10
+	entries1 := make([]Entry, n)
+	for i := 0; i < n; i++ {
+		entries1[i] = createRandomEntry(t, acc)
 	}
 
-	entries, err := testQueries.ListEntries(context.Background(), ListEntriesParams{
+	entries2, err := testQueries.ListEntries(context.Background(), ListEntriesParams{
 		Limit:  5,
 		Offset: 5,
 	})
 	require.NoError(t, err)
-	require.Len(t, entries, 5)
-	for _, entry := range entries {
+	require.Len(t, entries2, 5)
+	for _, entry := range entries2 {
 		require.NotEmpty(t, entry)
 	}
+	for _, entry := range entries1 {
+		cleanUpEntry(t, entry, false)
+	}
+	cleanUpAccount(t, acc)
 }
 
 func TestUpdateEntry(t *testing.T) {
@@ -91,10 +114,13 @@ func TestUpdateEntry(t *testing.T) {
 	require.Equal(t, entry1.CreatedAt, entry2.CreatedAt)
 	require.Equal(t, args.Amount, entry2.Amount)
 	require.NotEqual(t, entry1.Amount, entry2.Amount)
+
+	cleanUpEntry(t, entry1, true)
 }
 
 func TestDeleteEntry(t *testing.T) {
-	entry1 := createRandomEntry(t, createRandomAccount(t))
+	acc := createRandomAccount(t)
+	entry1 := createRandomEntry(t, acc)
 	err := testQueries.DeleteEntry(context.Background(), entry1.ID)
 	require.NoError(t, err)
 
@@ -102,6 +128,8 @@ func TestDeleteEntry(t *testing.T) {
 	require.Error(t, err)
 	require.EqualError(t, err, sql.ErrNoRows.Error())
 	require.Empty(t, entry2)
+
+	cleanUpAccount(t, acc)
 }
 
 func TestDeleteEntriesByAccount(t *testing.T) {
@@ -115,4 +143,6 @@ func TestDeleteEntriesByAccount(t *testing.T) {
 	entries, err := testQueries.GetEntriesByAccount(context.Background(), acc.ID)
 	require.NoError(t, err)
 	require.Empty(t, entries)
+
+	cleanUpAccount(t, acc)
 }

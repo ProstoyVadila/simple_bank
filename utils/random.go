@@ -1,9 +1,12 @@
 package utils
 
 import (
+	"fmt"
 	"math/rand"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const alphabet = "abcdefghijklmnopqrstuvwxyz"
@@ -27,7 +30,7 @@ func RandomString(n int) string {
 }
 
 func RandomOwner() string {
-	return RandomString(rand.Intn(12))
+	return RandomString(rand.Intn(12)) + uuid.NewString()
 }
 
 func RandomBalance() int64 {
@@ -37,4 +40,8 @@ func RandomBalance() int64 {
 func RandomCurrency() string {
 	c := [3]string{"PHP", "USD", "KZT"}
 	return c[rand.Intn(len(c))]
+}
+
+func RandomEmail() string {
+	return fmt.Sprintf("%v@email.com", RandomOwner())
 }

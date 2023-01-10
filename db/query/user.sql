@@ -12,3 +12,7 @@ insert into users (
 select * from users
 where username = $1 limit 1;
 
+-- name: DeleteUser :exec
+delete from users
+where username = $1;
+

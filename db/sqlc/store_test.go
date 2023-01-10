@@ -14,6 +14,7 @@ func TestTransferTx(t *testing.T) {
 
 	n := 5
 	amount := int64(10)
+	transfers := make([]TransferTxResult, n)
 
 	errs := make(chan error)
 	results := make(chan TransferTxResult)
@@ -42,6 +43,7 @@ func TestTransferTx(t *testing.T) {
 
 		result := <-results
 		require.NotEmpty(t, result)
+		transfers[i] = result
 
 		// Checking transfer data
 		require.NotEmpty(t, result.Transfer)
@@ -103,6 +105,14 @@ func TestTransferTx(t *testing.T) {
 	require.Equal(t, account1.Balance-int64(n)*amount, updatedAccount1.Balance)
 	require.Equal(t, account2.Balance+int64(n)*amount, updatedAccount2.Balance)
 
+	for _, transfer := range transfers {
+		cleanUpTransfer(t, transfer.Transfer.ID)
+		cleanUpEntry(t, transfer.FromEntry, false)
+		cleanUpEntry(t, transfer.ToEntry, false)
+	}
+	// cleanUpAccount(t, account1)
+	// cleanUpAccount(t, account2)
+
 }
 
 func TestTransferTxDeadlock(t *testing.T) {
@@ -112,8 +122,10 @@ func TestTransferTxDeadlock(t *testing.T) {
 
 	n := 10
 	amount := int64(10)
+	transfers := make([]TransferTxResult, n)
 
 	errs := make(chan error)
+	results := make(chan TransferTxResult)
 	defer close(errs)
 
 	for i := 0; i < n; i++ {
@@ -125,7 +137,7 @@ func TestTransferTxDeadlock(t *testing.T) {
 		}
 
 		go func() {
-			_, err := store.TransferTx(
+			transfer, err := store.TransferTx(
 				context.Background(),
 				TransferTxParams{
 					FromAccountID: fromAccount.ID,
@@ -134,11 +146,13 @@ func TestTransferTxDeadlock(t *testing.T) {
 					Currency:      fromAccount.Currency,
 				})
 			errs <- err
+			results <- transfer
 		}()
 	}
 
 	for i := 0; i < n; i++ {
 		err := <-errs
+		transfers[i] = <-results
 		require.NoError(t, err)
 	}
 
@@ -151,4 +165,11 @@ func TestTransferTxDeadlock(t *testing.T) {
 	require.Equal(t, account1.Balance, updatedAccount1.Balance)
 	require.Equal(t, account2.Balance, updatedAccount2.Balance)
 
+	for _, transfer := range transfers {
+		cleanUpTransfer(t, transfer.Transfer.ID)
+		cleanUpEntry(t, transfer.FromEntry, false)
+		cleanUpEntry(t, transfer.ToEntry, false)
+	}
+	// cleanUpUser(t, account1.OwnerName)
+	// cleanUpUser(t, account2.OwnerName)
 }

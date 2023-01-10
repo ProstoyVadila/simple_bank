@@ -9,14 +9,14 @@ create table accounts (
 );
 create table entries (
     id uuid primary key default uuid_generate_v4(),
-    account_id uuid not null references accounts(id),
+    account_id uuid not null references accounts(id) on delete cascade,
     amount bigint not null,
     created_at timestamptz not null default (now())
 );
 create table transfers (
     id uuid primary key default uuid_generate_v4(),
-    from_account_id uuid not null references accounts(id),
-    to_account_id uuid not null references accounts(id),
+    from_account_id uuid not null references accounts(id) on delete cascade,
+    to_account_id uuid not null references accounts(id) on delete cascade,
     amount bigint not null,
     created_at timestamptz not null default (now())
 );

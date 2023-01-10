@@ -19,6 +19,8 @@ type Querier interface {
 	DeleteAccount(ctx context.Context, id uuid.UUID) error
 	DeleteEntriesByAccount(ctx context.Context, accountID uuid.UUID) error
 	DeleteEntry(ctx context.Context, id uuid.UUID) error
+	DeleteTransfer(ctx context.Context, id uuid.UUID) error
+	DeleteUser(ctx context.Context, username string) error
 	GetAccount(ctx context.Context, id uuid.UUID) (Account, error)
 	GetAccountForUpdate(ctx context.Context, id uuid.UUID) (Account, error)
 	GetEntriesByAccount(ctx context.Context, accountID uuid.UUID) ([]Entry, error)

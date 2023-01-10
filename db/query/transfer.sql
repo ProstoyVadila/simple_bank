@@ -28,3 +28,6 @@ order by created_at
 limit $1
 offset $2;
 
+-- name: DeleteTransfer :exec
+delete from transfers
+where id = $1;

@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	setLogger()
+	setLogger(zerolog.InfoLevel)
 
 	log.Info().Msg("Loading config")
 	config, err := utils.LoadConfig(".")
@@ -39,7 +39,7 @@ func main() {
 	}
 }
 
-func setLogger() {
+func setLogger(level zerolog.Level) {
 	zerolog.TimeFieldFormat = utils.TimeFormat
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 }

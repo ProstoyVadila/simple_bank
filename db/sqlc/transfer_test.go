@@ -5,8 +5,16 @@ import (
 	"testing"
 
 	"github.com/ProstoyVadila/simple_bank/utils"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
+
+func cleanUpTransfer(t *testing.T, transferID uuid.UUID) {
+	t.Cleanup(func() {
+		err := testQueries.DeleteTransfer(context.Background(), transferID)
+		require.NoError(t, err)
+	})
+}
 
 func createRandomTransfer(t *testing.T, args CreateTransferParams) Transfer {
 
@@ -29,7 +37,9 @@ func TestCreateTransfer(t *testing.T) {
 		ToAccountID:   createRandomAccount(t).ID,
 		Amount:        utils.RandomBalance(),
 	}
-	createRandomTransfer(t, args)
+	transfer := createRandomTransfer(t, args)
+
+	cleanUpTransfer(t, transfer.ID)
 }
 
 func TestGetTransfer(t *testing.T) {
@@ -43,10 +53,13 @@ func TestGetTransfer(t *testing.T) {
 	transfer2, err := testQueries.GetTrasfer(context.Background(), transfer1.ID)
 	require.NoError(t, err)
 	require.Equal(t, transfer1, transfer2)
+
+	cleanUpTransfer(t, transfer1.ID)
 }
 
 func TestGetTransfersByFromAccount(t *testing.T) {
 	fromAcc := createRandomAccount(t)
+
 	var transfers1 [5]Transfer
 	for i := 0; i < len(transfers1); i++ {
 		args := CreateTransferParams{
@@ -67,10 +80,14 @@ func TestGetTransfersByFromAccount(t *testing.T) {
 		require.Equal(t, fromAcc.ID, trasfer.FromAccountID)
 		require.Equal(t, transfers1[i], trasfer)
 	}
+	for _, transfer := range transfers1 {
+		cleanUpTransfer(t, transfer.ID)
+	}
 }
 
 func TestGetTransfersByToAccount(t *testing.T) {
 	toAcc := createRandomAccount(t)
+
 	var transfers1 [5]Transfer
 	for i := 0; i < len(transfers1); i++ {
 		args := CreateTransferParams{
@@ -91,16 +108,22 @@ func TestGetTransfersByToAccount(t *testing.T) {
 		require.Equal(t, toAcc.ID, trasfer.ToAccountID)
 		require.Equal(t, transfers1[i], trasfer)
 	}
+
+	for _, transfer := range transfers1 {
+		cleanUpTransfer(t, transfer.ID)
+	}
 }
 
 func TestListTrasnfers(t *testing.T) {
-	for i := 0; i < 10; i++ {
+	n := 10
+	transfers1 := make([]Transfer, n)
+	for i := 0; i < n; i++ {
 		args := CreateTransferParams{
 			FromAccountID: createRandomAccount(t).ID,
 			ToAccountID:   createRandomAccount(t).ID,
 			Amount:        utils.RandomBalance(),
 		}
-		createRandomTransfer(t, args)
+		transfers1[i] = createRandomTransfer(t, args)
 	}
 
 	transfers, err := testQueries.ListTransfers(context.Background(), ListTransfersParams{
@@ -110,4 +133,8 @@ func TestListTrasnfers(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, transfers)
 	require.Len(t, transfers, 5)
+
+	for _, transfer := range transfers1 {
+		cleanUpTransfer(t, transfer.ID)
+	}
 }

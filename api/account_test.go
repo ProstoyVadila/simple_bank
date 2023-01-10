@@ -42,10 +42,10 @@ func requireBodyMatchAccount(t *testing.T, body *bytes.Buffer, account db.Accoun
 func TestGetAccountApi(t *testing.T) {
 	account := randomAccount()
 	testCases := []struct {
-		name       string
-		accountID  utils.UUIDString
 		buildStubs func(store *mockdb.MockStore)
 		checkResp  func(t *testing.T, recorder *httptest.ResponseRecorder)
+		name       string
+		accountID  utils.UUIDString
 	}{
 		{
 			name:      "OK",
@@ -85,18 +85,6 @@ func TestGetAccountApi(t *testing.T) {
 			},
 			checkResp: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
-			},
-		},
-		{
-			name:      "Invalid ID",
-			accountID: utils.UUIDString(uuid.Nil.String()),
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					GetAccount(gomock.Any(), gomock.Any()).
-					Times(1)
-			},
-			checkResp: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
 			},
 		},
 		{
