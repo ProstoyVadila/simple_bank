@@ -1,20 +1,27 @@
+include dev.env
+
 scheme?=new_scheme
+package_name=github.com/ProstoyVadila/simple_bank
+
+
+check_env:
+	echo $(DB_SOURCE)
 
 postgres:
-	@docker run --name simple_bank_db -p 5432:5432 -e POSTGRES_USER=admni -e POSTGRES_PASSWORD=stopmining -e POSTGRES_DB=data -d postgres:14-alpine
+	@docker run --name simple_bank_db -p 5432:$(PGPORT) -e POSTGRES_USER=$(PGUSER) -e POSTGRES_PASSWORD=$(PGPASSWORD) -e POSTGRES_DB=$(PGBASE) -d postgres:14-alpine
 psql:
-	@PGPASSWORD=stopmining psql -U admni -h localhost -p 5432 -d data
+	@PGPASSWORD=$(PGPASSWORD) psql -U $(PGUSER) -h $(PGHOST) -p $(PGPORT) -d $(PGBASE)
 create_db:
-	docker exec -it simple_bank_db createdb --username=admni data
+	docker exec -it simple_bank_db createdb --username=$(PGUSER) $(PGBASE)
 drop_db:
-	docker exec -it simple_bank_db dropdb --username=admni data
+	docker exec -it simple_bank_db dropdb --username=$(PGUSER) $(PGBASE)
 
 migrate_create:
 	migrate create -ext sql -dir db/migrations -seq $(scheme)
 migrate_up:
-	@migrate -path db/migrations -database 'postgresql://admni:stopmining@localhost:5432/data?sslmode=disable' -verbose up
+	@migrate -path db/migrations -database '$(DB_SOURCE)' -verbose up
 mgirate_down:
-	@migrate -path db/migrations -database 'postgresql://admni:stopmining@localhost:5432/data?sslmode=disable' -verbose down
+	@migrate -path db/migrations -database '$(DB_SOURCE)' -verbose down
 
 gen_sqlc:
 	sqlc generate
@@ -28,10 +35,10 @@ fieldalignment:
 	fieldalignment -fix ./... 
 
 server:
-	@GIN_MODE=debug go run main.go
+	@go run main.go
 
 mocks:
-	mockgen -build_flags=--mod=mod -package mockdb -destination db/mock/store.go github.com/ProstoyVadila/simple_bank/db/sqlc Store
+	mockgen -build_flags=--mod=mod -package mockdb -destination db/mock/store.go $(package_name)/db/sqlc Store
 
 
 .PHONY: postgres createdb dropdb recreate_db psql sqlc migrate_create migrate_up mgirate_down fieldalignment server gen_mocks gen_sqlc
