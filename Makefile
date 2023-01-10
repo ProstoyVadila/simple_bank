@@ -1,3 +1,5 @@
+scheme?=new_scheme
+
 postgres:
 	@docker run --name simple_bank_db -p 5432:5432 -e POSTGRES_USER=admni -e POSTGRES_PASSWORD=stopmining -e POSTGRES_DB=data -d postgres:14-alpine
 psql:
@@ -7,6 +9,8 @@ create_db:
 drop_db:
 	docker exec -it simple_bank_db dropdb --username=admni data
 
+migrate_create:
+	migrate create -ext sql -dir db/migrations -seq $(scheme)
 migrate_up:
 	@migrate -path db/migrations -database 'postgresql://admni:stopmining@localhost:5432/data?sslmode=disable' -verbose up
 mgirate_down:
@@ -30,4 +34,4 @@ mocks:
 	mockgen -build_flags=--mod=mod -package mockdb -destination db/mock/store.go github.com/ProstoyVadila/simple_bank/db/sqlc Store
 
 
-.PHONY: postgres createdb dropdb recreate_db psql sqlc migrate_up mgirate_down fieldalignment server gen_mocks gen_sqlc
+.PHONY: postgres createdb dropdb recreate_db psql sqlc migrate_create migrate_up mgirate_down fieldalignment server gen_mocks gen_sqlc
