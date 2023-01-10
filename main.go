@@ -6,6 +6,7 @@ import (
 	"github.com/ProstoyVadila/simple_bank/api"
 	db "github.com/ProstoyVadila/simple_bank/db/sqlc"
 	"github.com/ProstoyVadila/simple_bank/utils"
+	"github.com/gin-gonic/gin"
 
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
@@ -27,6 +28,7 @@ func main() {
 		log.Fatal().Err(err).Msg("Can't connect to db")
 	}
 
+	setGinMode(config)
 	store := db.NewStore(conn)
 	server := api.NewServer(store)
 
@@ -40,4 +42,8 @@ func main() {
 func setLogger() {
 	zerolog.TimeFieldFormat = utils.TimeFormat
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+}
+
+func setGinMode(config utils.Config) {
+	gin.SetMode(config.GinMode)
 }

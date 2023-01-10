@@ -13,7 +13,10 @@ require (
 	github.com/stretchr/testify v1.8.1
 )
 
-require github.com/mattn/go-colorable v0.1.12 // indirect
+require (
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	golang.org/x/time v0.3.0 // indirect
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

@@ -33,3 +33,14 @@ func (e ErrInvalidCurrencyType) Error() string {
 	}
 	return e.Msg
 }
+
+type ErrThrottling struct {
+	Msg string
+}
+
+func (e ErrThrottling) Error() string {
+	if e.Msg == "" {
+		return fmt.Sprintln("Limit exceeded")
+	}
+	return e.Msg
+}

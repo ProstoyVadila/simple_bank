@@ -6,6 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	maxEventsPerSec = 1000
+	maxBurstSize    = 20
+)
+
 type ApiError struct {
 	Field string
 	Msg   string
@@ -20,10 +25,7 @@ func NewServer(store db.Store) *Server {
 	server := &Server{store: store}
 	server.router = gin.New()
 
-	// register middleware
-	middleware.Register(server.router)
-
-	// register routes
+	server.setMiddlewares()
 	server.setRoutes()
 
 	// register various validators for gin
@@ -40,4 +42,14 @@ func (s *Server) Start(address string) error {
 // errorResponse wraps error messages
 func errorResponse(err error) gin.H {
 	return gin.H{"error": err.Error()}
+}
+
+// setMiddlewares adds middlewares to router
+func (s *Server) setMiddlewares() {
+	s.router.Use(
+		middleware.Recovery(),
+		middleware.DefaultLogger(),
+		middleware.CORS(),
+		middleware.Throttling(maxEventsPerSec, maxBurstSize),
+	)
 }

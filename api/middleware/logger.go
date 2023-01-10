@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func DefaultLoggerMiddleware() gin.HandlerFunc {
+func DefaultLogger() gin.HandlerFunc {
 	log.Info().Msg("Setting logger middleware")
 	return StructuredLogger(&log.Logger)
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func CORSMiddleware() gin.HandlerFunc {
+func CORS() gin.HandlerFunc {
 	log.Info().Msg("Setting CORS middleware")
 	return func(ctx *gin.Context) {
 		ctx.Writer.Header().Add("Access-Control-Allow-Origin", "*")
