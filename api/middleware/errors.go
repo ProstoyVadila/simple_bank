@@ -21,9 +21,9 @@ func Errors() gin.HandlerFunc {
 		ctx.Next()
 		if len(ctx.Errors) > 0 {
 			for _, gErr := range ctx.Errors {
-				log.Error().Msg(fmt.Sprintf("Error: %v", gErr.Type))
 				switch gErr.Type {
 				case gin.ErrorTypePrivate:
+					log.Error().Msg("Error: gin.ErrorTypePrivate")
 					err := gErr.Unwrap()
 					var vErrs validator.ValidationErrors
 					if errors.As(err, &vErrs) {
@@ -33,14 +33,21 @@ func Errors() gin.HandlerFunc {
 					case *pq.Error:
 						RespondWithPqError(ctx, err)
 					case e.ErrAccountNotFound, e.ErrInvalidCurrencyType:
-						ctx.JSON(http.StatusForbidden, ErrorResponse(err))
+						ctx.JSON(http.StatusForbidden, errorResponse(err))
+					default:
+						ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 					}
 				case gin.ErrorTypeBind:
+					log.Error().Msg("Error: gin.ErrorTypeBind")
 				case gin.ErrorTypePublic:
+					log.Error().Msg("Error: gin.ErrorTypePublic")
 				case gin.ErrorTypeRender:
+					log.Error().Msg("Error: gin.ErrorTypeRecorder")
 				case gin.ErrorTypeAny:
+					log.Error().Msg("Error: gin.ErrorTypeAny")
 				default:
-					ctx.JSON(http.StatusInternalServerError, ErrorResponse(gErr))
+					log.Error().Msg("Error: in Default")
+					ctx.JSON(http.StatusInternalServerError, errorResponse(gErr))
 				}
 			}
 		}
@@ -52,8 +59,8 @@ type ApiError struct {
 	Msg   string
 }
 
-// ErrorResponse wraps error messages
-func ErrorResponse(err error) gin.H {
+// errorResponse wraps error messages
+func errorResponse(err error) gin.H {
 	return gin.H{"error": err.Error()}
 }
 
@@ -86,7 +93,7 @@ func RespondWithValidationError(ctx *gin.Context, err error) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"errors": out})
 		return
 	}
-	ctx.JSON(http.StatusBadRequest, ErrorResponse(err))
+	ctx.JSON(http.StatusBadRequest, errorResponse(err))
 }
 
 // respondWithPqError responds with value
@@ -95,14 +102,14 @@ func RespondWithPqError(ctx *gin.Context, err error) {
 	if ok {
 		switch pqErr.Code.Name() {
 		case "unique_violation", "foreign_key_violation":
-			ctx.JSON(http.StatusForbidden, ErrorResponse(pqErr))
+			ctx.JSON(http.StatusForbidden, errorResponse(pqErr))
 			return
 		default:
-			ctx.JSON(http.StatusInternalServerError, ErrorResponse(pqErr))
+			ctx.JSON(http.StatusInternalServerError, errorResponse(pqErr))
 			return
 		}
 	}
-	ctx.JSON(http.StatusInternalServerError, ErrorResponse(pqErr))
+	ctx.JSON(http.StatusInternalServerError, errorResponse(pqErr))
 }
 
 func RespondWithTransferError(ctx *gin.Context, err error) {
