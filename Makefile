@@ -20,8 +20,11 @@ migrate_create:
 	migrate create -ext sql -dir db/migrations -seq $(scheme)
 migrate_up:
 	@migrate -path db/migrations -database '$(DB_SOURCE)' -verbose up
-mgirate_down:
+migrate_down:
 	@migrate -path db/migrations -database '$(DB_SOURCE)' -verbose down
+migrate_down_last:
+	@migrate -path db/migrations -database '$(DB_SOURCE)' -verbose down 1
+
 
 gen_sqlc:
 	sqlc generate

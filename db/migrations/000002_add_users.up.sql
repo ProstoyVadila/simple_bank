@@ -8,4 +8,4 @@ create table users (
 );
 
 alter table accounts add foreign key (owner_name) references users(username);
-create unique index on accounts(owner_name, currency);
+alter table accounts add constraint owner_currency_key unique (owner_name, currency);
