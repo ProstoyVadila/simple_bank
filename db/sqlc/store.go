@@ -52,10 +52,10 @@ func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 
 // TransferTxParams contains the input params if the transfer tansaction
 type TransferTxParams struct {
+	Currency      string    `json:"currency"`
+	Amount        int64     `json:"amount"`
 	FromAccountID uuid.UUID `json:"from_account_id"`
 	ToAccountID   uuid.UUID `json:"to_account_id"`
-	Amount        int64     `json:"amount"`
-	Currency      string    `json:"currency"`
 }
 
 // TransferTxResult is the result of the transfer transaction

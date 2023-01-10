@@ -20,6 +20,8 @@ migrate_create:
 	migrate create -ext sql -dir db/migrations -seq $(scheme)
 migrate_up:
 	@migrate -path db/migrations -database '$(DB_SOURCE)' -verbose up
+migrate_up_last:
+	@migrate -path db/migrations -database '$(DB_SOURCE)' -verbose up 1
 migrate_down:
 	@migrate -path db/migrations -database '$(DB_SOURCE)' -verbose down
 migrate_down_last:
@@ -29,7 +31,7 @@ migrate_down_last:
 gen_sqlc:
 	sqlc generate
 
-sqlc: gen_sqlc fieldalignment
+sqlc: gen_sqlc mocks fieldalignment
 
 tests:
 	go test -v -cover ./...

@@ -1,21 +1,19 @@
 package api
 
 import (
-	// "errors"
 	"net/http"
 
 	db "github.com/ProstoyVadila/simple_bank/db/sqlc"
 	"github.com/ProstoyVadila/simple_bank/e"
 	"github.com/ProstoyVadila/simple_bank/utils"
 	"github.com/gin-gonic/gin"
-	// "github.com/go-playground/validator/v10"
 )
 
 type transferRequest struct {
 	FromAccountID utils.UUIDString `json:"from_account_id" binding:"required,uuid"`
 	ToAccountID   utils.UUIDString `json:"to_account_id" binding:"required,uuid"`
-	Amount        int64            `json:"amount" binding:"required,gt=0"`
 	Currency      string           `json:"currency" binding:"required,currency"`
+	Amount        int64            `json:"amount" binding:"required,gt=0"`
 }
 
 func (s *Server) createTransfer(ctx *gin.Context) {
