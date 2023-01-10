@@ -5,6 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type ApiError struct {
+	Field string
+	Msg   string
+}
+
 type Server struct {
 	store  db.Store
 	router *gin.Engine
@@ -12,7 +17,16 @@ type Server struct {
 
 func NewServer(store db.Store) *Server {
 	server := &Server{store: store}
+
+	// register routes
 	server.router = routes(server)
+
+	// register middleware
+	registerMiddlewares(server.router)
+
+	// register various validators for gin
+	registerValidators()
+
 	return server
 }
 

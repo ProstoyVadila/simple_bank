@@ -11,14 +11,14 @@ import (
 
 type createAccountRequest struct {
 	OwnerName string `json:"owner_name" binding:"required"`
-	Currency  string `json:"currency" binding:"required,oneof=USD PHP KZT"`
+	Currency  string `json:"currency" binding:"required,currency"`
 }
 
 // createAccount creates a new account in db
 func (s *Server) createAccount(ctx *gin.Context) {
 	var req createAccountRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		respondWithValidationError(ctx, err)
 		return
 	}
 
@@ -43,7 +43,7 @@ type getAccountRequest struct {
 func (s *Server) getAccount(ctx *gin.Context) {
 	var req getAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		respondWithValidationError(ctx, err)
 		return
 	}
 
@@ -51,6 +51,7 @@ func (s *Server) getAccount(ctx *gin.Context) {
 	id, err := req.ID.UUID()
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
 	}
 
 	account, err := s.store.GetAccount(ctx, id)
@@ -74,7 +75,7 @@ type listAccountRequest struct {
 func (s *Server) listAccount(ctx *gin.Context) {
 	var req listAccountRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		respondWithValidationError(ctx, err)
 		return
 	}
 
@@ -98,16 +99,19 @@ type deleteAccountRequest struct {
 func (s *Server) deleteAccount(ctx *gin.Context) {
 	var req deleteAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		respondWithValidationError(ctx, err)
+		return
 	}
 
 	id, err := req.ID.UUID()
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
 	}
 	err = s.store.DeleteAccount(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
 	}
 	ctx.JSON(http.StatusOK, req)
 }

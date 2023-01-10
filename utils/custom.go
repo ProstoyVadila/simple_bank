@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"reflect"
+
 	"github.com/ProstoyVadila/simple_bank/e"
 	"github.com/google/uuid"
 )
@@ -16,14 +18,12 @@ func (u *UUIDString) UUID() (uuid.UUID, error) {
 	return id, err
 }
 
-// IsValidCurrency checks a same currency type for all participants in a money transfer
-func ValidateCurrency(requestedCurrency, fromAccountCurrency, toAccountCurrency string) error {
-	if !(requestedCurrency == fromAccountCurrency && requestedCurrency == toAccountCurrency) {
-		return e.ErrInvalidCurrencyType{
-			ReqCurr:     requestedCurrency,
-			FromAccCurr: fromAccountCurrency,
-			ToAcctCurr:  toAccountCurrency,
-		}
+func KindOf(obj interface{}) reflect.Kind {
+	val := reflect.ValueOf(obj)
+	valType := val.Kind()
+
+	if valType == reflect.Ptr {
+		valType = val.Elem().Kind()
 	}
-	return nil
+	return valType
 }

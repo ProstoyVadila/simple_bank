@@ -23,16 +23,13 @@ func (e ErrInvalidID) Error() string {
 }
 
 type ErrInvalidCurrencyType struct {
-	ReqCurr     string
-	FromAccCurr string
-	ToAcctCurr  string
+	Curr string
+	Msg  string
 }
 
 func (e ErrInvalidCurrencyType) Error() string {
-	return fmt.Sprintf(
-		"Mismatched currency types: requested %v, but wanted %v and %v",
-		e.ReqCurr,
-		e.FromAccCurr,
-		e.ToAcctCurr,
-	)
+	if e.Msg == "" {
+		return fmt.Sprintf("Invalid currency type: %v", e.Curr)
+	}
+	return e.Msg
 }
