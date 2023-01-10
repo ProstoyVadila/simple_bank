@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/ProstoyVadila/simple_bank/api/middleware"
 	db "github.com/ProstoyVadila/simple_bank/db/sqlc"
 	"github.com/gin-gonic/gin"
 )
@@ -17,12 +18,13 @@ type Server struct {
 
 func NewServer(store db.Store) *Server {
 	server := &Server{store: store}
-
-	// register routes
-	server.router = routes(server)
+	server.router = gin.New()
 
 	// register middleware
-	registerMiddlewares(server.router)
+	middleware.Register(server.router)
+
+	// register routes
+	server.setRoutes()
 
 	// register various validators for gin
 	registerValidators()

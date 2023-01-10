@@ -2,30 +2,42 @@ package main
 
 import (
 	"database/sql"
-	"log"
 
 	"github.com/ProstoyVadila/simple_bank/api"
 	db "github.com/ProstoyVadila/simple_bank/db/sqlc"
 	"github.com/ProstoyVadila/simple_bank/utils"
 
 	_ "github.com/lib/pq"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
+	setLogger()
+
+	log.Info().Msg("Loading config")
 	config, err := utils.LoadConfig(".")
 	if err != nil {
-		log.Fatal("Can't load config file", err)
+		log.Fatal().Err(err).Msg("Can't load config file")
 	}
 
+	log.Info().Msg("Connecting to database")
 	conn, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
-		log.Fatal("Can't connect to db", err)
+		log.Fatal().Err(err).Msg("Can't connect to db")
 	}
 
 	store := db.NewStore(conn)
 	server := api.NewServer(store)
+
+	log.Info().Msg("Starting server")
 	err = server.Start(config.ServerAddress)
 	if err != nil {
-		log.Fatal("Can't start server", err)
+		log.Fatal().Err(err).Msg("Can't start server")
 	}
+}
+
+func setLogger() {
+	zerolog.TimeFieldFormat = utils.TimeFormat
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 }

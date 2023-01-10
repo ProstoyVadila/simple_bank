@@ -2,6 +2,8 @@ package utils
 
 import "github.com/spf13/viper"
 
+var TimeFormat = "02.01.2006 15:04:05"
+
 type Config struct {
 	DBDriver      string `mapstructure:"DB_DRIVER"`
 	DBSource      string `mapstructure:"DB_SOURCE"`
