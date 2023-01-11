@@ -16,6 +16,7 @@ func (s *Server) setRoutes() *gin.Engine {
 
 	// users
 	s.router.POST("/users", s.createUser)
+	s.router.GET("/users", s.getUser)
 
 	return router
 }

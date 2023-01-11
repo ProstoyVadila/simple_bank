@@ -16,7 +16,7 @@ type createUserRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 }
 
-type createUserResponse struct {
+type defaultUserResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 	Username  string    `json:"username"`
 	FullName  string    `json:"full_name"`
@@ -48,7 +48,31 @@ func (s *Server) createUser(ctx *gin.Context) {
 		ctx.Error(err)
 		return
 	}
-	resp := createUserResponse{
+	resp := defaultUserResponse{
+		Username:  user.Username,
+		FullName:  user.FullName,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	}
+	ctx.JSON(http.StatusOK, resp)
+}
+
+type getUserRequest struct {
+	Username string `json:"username" binding:"required"`
+}
+
+func (s *Server) getUser(ctx *gin.Context) {
+	var req getUserRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.Error(err)
+		return
+	}
+	user, err := s.store.GetUser(ctx, req.Username)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	resp := defaultUserResponse{
 		Username:  user.Username,
 		FullName:  user.FullName,
 		Email:     user.Email,
