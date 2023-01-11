@@ -3,10 +3,9 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const alphabet = "abcdefghijklmnopqrstuvwxyz"
@@ -30,7 +29,7 @@ func RandomString(n int) string {
 }
 
 func RandomOwner() string {
-	return RandomString(rand.Intn(12)) + uuid.NewString()
+	return RandomString(rand.Intn(26)) + strconv.Itoa(rand.Intn(999))
 }
 
 func RandomBalance() int64 {

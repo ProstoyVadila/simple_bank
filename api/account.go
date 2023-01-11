@@ -2,7 +2,6 @@ package api
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 
 	db "github.com/ProstoyVadila/simple_bank/db/sqlc"
@@ -19,9 +18,7 @@ type createAccountRequest struct {
 func (s *Server) createAccount(ctx *gin.Context) {
 	var req createAccountRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		// respondWithValidationError(ctx, err)
 		ctx.Error(err)
-		fmt.Println("ERROR!!", err.Error())
 		return
 	}
 
@@ -32,7 +29,6 @@ func (s *Server) createAccount(ctx *gin.Context) {
 	}
 	account, err := s.store.CreateAccount(ctx, args)
 	if err != nil {
-		// ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		ctx.Error(err)
 		return
 	}

@@ -40,7 +40,7 @@ fieldalignment:
 	fieldalignment -fix ./... 
 
 server:
-	@go run main.go
+	@GIN_MODE=release go run main.go
 
 mocks:
 	mockgen -build_flags=--mod=mod -package mockdb -destination db/mock/store.go $(package_name)/db/sqlc Store

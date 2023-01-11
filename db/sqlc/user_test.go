@@ -17,9 +17,12 @@ func cleanUpUser(t *testing.T, username string) {
 }
 
 func createRandomUser(t *testing.T) User {
+	hashedPassword, err := utils.HashPassword(utils.RandomString(8))
+	require.NoError(t, err)
+
 	arg := CreateUserParams{
 		Username:       utils.RandomOwner(),
-		HashedPassword: "password",
+		HashedPassword: hashedPassword,
 		FullName:       utils.RandomOwner(),
 		Email:          utils.RandomEmail(),
 	}

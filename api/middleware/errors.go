@@ -28,14 +28,18 @@ func Errors() gin.HandlerFunc {
 					var vErrs validator.ValidationErrors
 					if errors.As(err, &vErrs) {
 						RespondWithValidationError(ctx, err)
+						return
 					}
 					switch err.(type) {
 					case *pq.Error:
 						RespondWithPqError(ctx, err)
+						return
 					case e.ErrAccountNotFound, e.ErrInvalidCurrencyType:
 						ctx.JSON(http.StatusForbidden, errorResponse(err))
+						return
 					default:
 						ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+						return
 					}
 				case gin.ErrorTypeBind:
 					log.Error().Msg("Error: gin.ErrorTypeBind")
@@ -65,16 +69,18 @@ func errorResponse(err error) gin.H {
 }
 
 // errMsgForTag returns an exact error message depending on a tag of validation error
-func errMsgForTag(tag string, val interface{}) string {
+func errMsgForBindingTag(tag string, val interface{}) string {
 	switch tag {
 	case "required":
 		return "This field is required"
 	case "currency":
-		return fmt.Sprintf(
-			"Invalid currency type: %v, should be: %v",
-			val,
-			utils.Currencies,
-		)
+		return fmt.Sprintf("Invalid currency type: %v, should be on of: %v", val, utils.Currencies)
+	case "min":
+		return "Value is too short"
+	case "max":
+		return "Value is too big"
+	case "email":
+		return "Invalid email"
 	}
 	return ""
 }
@@ -87,7 +93,7 @@ func RespondWithValidationError(ctx *gin.Context, err error) {
 		for i, vErr := range vErrs {
 			out[i] = ApiError{
 				Field: vErr.Field(),
-				Msg:   errMsgForTag(vErr.Tag(), vErr.Value()),
+				Msg:   errMsgForBindingTag(vErr.Tag(), vErr.Value()),
 			}
 		}
 		ctx.JSON(http.StatusBadRequest, gin.H{"errors": out})
