@@ -83,6 +83,7 @@ func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user db.User) {
 
 func TestCreateUserApi(t *testing.T) {
 	user, password := createRandomUser(t)
+
 	tests := []struct {
 		buildStubs func(store *mockdb.MockStore)
 		checkResp  func(t *testing.T, recorder *httptest.ResponseRecorder)
@@ -121,7 +122,8 @@ func TestCreateUserApi(t *testing.T) {
 
 			store := mockdb.NewMockStore(ctrl)
 			tt.buildStubs(store)
-			server := NewServer(store)
+			server := newTestServer(t, store)
+
 			recorder := httptest.NewRecorder()
 
 			req, err := http.NewRequest(http.MethodPost, "/users", jsonBody(t, tt.userReq))

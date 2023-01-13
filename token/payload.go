@@ -18,7 +18,7 @@ type ErrInvalidSecretKeySize struct {
 }
 
 func (e ErrInvalidSecretKeySize) Error() string {
-	return fmt.Sprintf("invalid secret key size: %d", e.Size)
+	return fmt.Sprintf("invalid secret key size. Should be: %d", e.Size)
 }
 
 // Payload is the payload object for the token.

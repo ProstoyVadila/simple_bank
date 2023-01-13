@@ -9,7 +9,7 @@ import (
 )
 
 func createUserPasetoToken(t *testing.T, username string, duration time.Duration) testUserToken {
-	maker, err := NewPasetoMaker(utils.RandomString(32))
+	maker, err := NewPaseto(utils.RandomString(32))
 	require.NoError(t, err)
 
 	token, err := maker.CreateToken(username, duration)

@@ -41,6 +41,7 @@ func requireBodyMatchAccount(t *testing.T, body *bytes.Buffer, account db.Accoun
 
 func TestGetAccountApi(t *testing.T) {
 	account := randomAccount()
+
 	testCases := []struct {
 		buildStubs func(store *mockdb.MockStore)
 		checkResp  func(t *testing.T, recorder *httptest.ResponseRecorder)
@@ -109,7 +110,8 @@ func TestGetAccountApi(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			// building stubs for a particular test case
 			testCase.buildStubs(store)
-			server := NewServer(store)
+			server := newTestServer(t, store)
+
 			recorder := httptest.NewRecorder()
 			url := fmt.Sprintf("/accounts/%v", testCase.accountID)
 

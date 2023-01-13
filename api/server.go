@@ -1,8 +1,12 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/ProstoyVadila/simple_bank/api/middleware"
 	db "github.com/ProstoyVadila/simple_bank/db/sqlc"
+	"github.com/ProstoyVadila/simple_bank/token"
+	"github.com/ProstoyVadila/simple_bank/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,19 +16,29 @@ const (
 )
 
 type Server struct {
-	store  db.Store
-	router *gin.Engine
+	store      db.Store
+	router     *gin.Engine
+	tokenMaker token.Maker
+	config     utils.Config
 }
 
-func NewServer(store db.Store) *Server {
-	server := &Server{store: store}
+func NewServer(config utils.Config, store db.Store) (*Server, error) {
+	tokenMaker, err := token.NewPaseto(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token maker: %w", err)
+	}
+	server := &Server{
+		store:      store,
+		tokenMaker: tokenMaker,
+		config:     config,
+	}
 	server.router = gin.New()
 
 	server.setMiddlewares()
 	server.setRoutes()
 	server.setValidators()
 
-	return server
+	return server, nil
 }
 
 // Start http server

@@ -13,30 +13,36 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func main() {
+func init() {
 	setLogger(zerolog.InfoLevel)
+}
 
-	log.Info().Msg("Loading config")
+func main() {
+	log.Info().Msg("loading config")
 	config, err := utils.LoadConfig(".")
 	if err != nil {
-		log.Fatal().Err(err).Msg("Can't load config file")
+		log.Fatal().Err(err).Msg("can't load config file")
 	}
 
-	log.Info().Msg("Connecting to database")
+	log.Info().Msg("connecting to database")
 	conn, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Can't connect to db")
+		log.Fatal().Err(err).Msg("can't connect to db")
 	}
 
 	setGinMode(config)
 	store := db.NewStore(conn)
-	server := api.NewServer(store)
+	server, err := api.NewServer(config, store)
+	if err != nil {
+		log.Fatal().Err(err).Msg("can't create server")
+	}
 
-	log.Info().Msg("Starting server")
+	log.Info().Msg("starting server")
 	err = server.Start(config.ServerAddress)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Can't start server")
+		log.Fatal().Err(err).Msg("can't start server")
 	}
+	log.Info().Msg("Listening and serving HTTP on " + config.ServerAddress)
 }
 
 func setLogger(level zerolog.Level) {

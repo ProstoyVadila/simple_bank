@@ -9,6 +9,8 @@ import (
 	"golang.org/x/time/rate"
 )
 
+// TODO: add tests, add throttling limiter by ip
+// Throttling limits the number of requests per second
 func Throttling(maxEventsPerSec int, maxBurstSize int) gin.HandlerFunc {
 	log.Info().Msg("Setting Throttling middleware")
 	limiter := rate.NewLimiter(rate.Limit(maxEventsPerSec), maxBurstSize)
