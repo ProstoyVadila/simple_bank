@@ -5,11 +5,13 @@ go 1.19
 require github.com/google/uuid v1.3.0
 
 require (
+	github.com/aead/chacha20poly1305 v0.0.0-20201124145622-1a5aba2a8b29
 	github.com/gin-gonic/gin v1.8.2
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/golang/mock v1.6.0
 	github.com/lib/pq v1.10.7
+	github.com/o1egl/paseto v1.0.0
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/time v0.3.0
@@ -17,10 +19,8 @@ require (
 
 require (
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da // indirect
-	github.com/aead/chacha20poly1305 v0.0.0-20201124145622-1a5aba2a8b29 // indirect
 	github.com/aead/poly1305 v0.0.0-20180717145839-3fee0db0b635 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
-	github.com/o1egl/paseto v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 )
 
