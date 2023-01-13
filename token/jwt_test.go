@@ -16,7 +16,7 @@ type testUserToken struct {
 	token    string
 }
 
-func createUserToken(t *testing.T, username string, duration time.Duration) testUserToken {
+func createUserJWTToken(t *testing.T, username string, duration time.Duration) testUserToken {
 	maker, err := NewJWT(utils.RandomString(32))
 	require.NoError(t, err)
 
@@ -33,7 +33,7 @@ func createUserToken(t *testing.T, username string, duration time.Duration) test
 }
 
 func TestCreateJWTToken(t *testing.T) {
-	createUserToken(t, utils.RandomOwner(), time.Minute)
+	createUserJWTToken(t, utils.RandomOwner(), time.Minute)
 }
 
 func TestValidateJWTToken(t *testing.T) {
@@ -44,7 +44,7 @@ func TestValidateJWTToken(t *testing.T) {
 	}{
 		{
 			name: "valid token",
-			user: createUserToken(t, utils.RandomOwner(), time.Minute),
+			user: createUserJWTToken(t, utils.RandomOwner(), time.Minute),
 			testFunc: func(t *testing.T, userToken testUserToken) {
 				payload, err := userToken.maker.ValidateToken(userToken.token)
 				require.NoError(t, err)
@@ -54,7 +54,7 @@ func TestValidateJWTToken(t *testing.T) {
 		},
 		{
 			name: "expired token",
-			user: createUserToken(t, utils.RandomOwner(), time.Nanosecond),
+			user: createUserJWTToken(t, utils.RandomOwner(), time.Nanosecond),
 			testFunc: func(t *testing.T, userToken testUserToken) {
 				time.Sleep(time.Nanosecond * 5)
 				payload, err := userToken.maker.ValidateToken(userToken.token)
@@ -65,7 +65,7 @@ func TestValidateJWTToken(t *testing.T) {
 		},
 		{
 			name: "invalid token length",
-			user: createUserToken(t, utils.RandomOwner(), time.Minute),
+			user: createUserJWTToken(t, utils.RandomOwner(), time.Minute),
 			testFunc: func(t *testing.T, userToken testUserToken) {
 				payload, err := userToken.maker.ValidateToken("invalid token")
 				require.Error(t, err)

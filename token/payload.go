@@ -2,6 +2,7 @@ package token
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,6 +12,14 @@ var (
 	ErrInvalidToken = errors.New("token is invalid")
 	ErrExpiredToken = errors.New("token is expired")
 )
+
+type ErrInvalidSecretKeySize struct {
+	Size int
+}
+
+func (e ErrInvalidSecretKeySize) Error() string {
+	return fmt.Sprintf("invalid secret key size: %d", e.Size)
+}
 
 // Payload is the payload object for the token.
 type Payload struct {

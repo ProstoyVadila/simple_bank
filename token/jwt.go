@@ -2,17 +2,14 @@ package token
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 )
 
 const (
-	minSecretKeyLength = 32
+	minSecretKeySize = 32
 )
-
-var ErrInvalidSecretKeyLength = fmt.Errorf("it must be at least %v characters long", minSecretKeyLength)
 
 // JWT is a JWT token maker. It implements the Maker interface.
 type JWT struct {
@@ -21,8 +18,8 @@ type JWT struct {
 
 // NewJWT creates a new JWT token maker.
 func NewJWT(secretKey string) (Maker, error) {
-	if len(secretKey) < minSecretKeyLength {
-		return nil, ErrInvalidSecretKeyLength
+	if len(secretKey) < minSecretKeySize {
+		return nil, ErrInvalidSecretKeySize{Size: minSecretKeySize}
 	}
 	return &JWT{secretKey: secretKey}, nil
 }
