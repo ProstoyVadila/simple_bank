@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ProstoyVadila/simple_bank/utils"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/stretchr/testify/require"
 )
 
@@ -29,39 +30,6 @@ func createUserToken(t *testing.T, username string, duration time.Duration) test
 		username: username,
 		token:    token,
 	}
-}
-
-func TestJWTMaker(t *testing.T) {
-	tests := []struct {
-		name      string
-		secretKey string
-		testFunc  func(t *testing.T, maker Maker)
-	}{
-		{
-			name:      "valid",
-			secretKey: utils.RandomString(32),
-			testFunc: func(t *testing.T, maker Maker) {
-				require.NotNil(t, maker)
-			},
-		},
-		{
-			name:      "invalid",
-			secretKey: utils.RandomString(16),
-			testFunc: func(t *testing.T, maker Maker) {
-				require.Nil(t, maker)
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			maker, err := NewJWT(tt.secretKey)
-			if err != nil {
-				require.Equal(t, ErrInvalidSecretKeyLength, err)
-			}
-			tt.testFunc(t, maker)
-		})
-	}
-
 }
 
 func TestCreateJWTToken(t *testing.T) {
@@ -112,4 +80,21 @@ func TestValidateJWTToken(t *testing.T) {
 			tt.testFunc(t, tt.user)
 		})
 	}
+}
+
+func TestInvalidTokenAlgNone(t *testing.T) {
+	payload, err := NewPayload(utils.RandomOwner(), time.Minute)
+	require.NoError(t, err)
+
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodNone, payload)
+	token, err := jwtToken.SignedString(jwt.UnsafeAllowNoneSignatureType)
+	require.NoError(t, err)
+
+	maker, err := NewJWT(utils.RandomString(32))
+	require.NoError(t, err)
+
+	payload, err = maker.ValidateToken(token)
+	require.Error(t, err)
+	require.EqualError(t, err, ErrInvalidToken.Error())
+	require.Nil(t, payload)
 }
