@@ -38,11 +38,11 @@ func main() {
 	}
 
 	log.Info().Msg("starting server")
+	log.Info().Msg("Listening and serving HTTP on " + config.ServerAddress)
 	err = server.Start(config.ServerAddress)
 	if err != nil {
 		log.Fatal().Err(err).Msg("can't start server")
 	}
-	log.Info().Msg("Listening and serving HTTP on " + config.ServerAddress)
 }
 
 func setLogger(level zerolog.Level) {

@@ -50,19 +50,19 @@ func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 // TransferTxParams contains the input params if the transfer tansaction
 type TransferTxParams struct {
 	Currency    string  `json:"currency"`
-	Amount      int64   `json:"amount"`
 	FromAccount Account `json:"from_account"`
 	ToAccount   Account `json:"to_account"`
+	Amount      int64   `json:"amount"`
 }
 
 // TransferTxResult is the result of the transfer transaction
 type TransferTxResult struct {
+	Currency    string   `json:"currency"`
 	FromAccount Account  `json:"from_account"`
 	ToAccount   Account  `json:"to_account"`
 	FromEntry   Entry    `json:"from_entry"`
 	ToEntry     Entry    `json:"to_entry"`
 	Transfer    Transfer `json:"transfer"`
-	Currency    string   `json:"currency"`
 }
 
 // TransferTx provides a money transfer between accounts.
