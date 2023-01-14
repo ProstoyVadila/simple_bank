@@ -8,9 +8,11 @@ check_env:
 	echo $(DB_SOURCE)
 
 run_postgres:
-	@docker run --name simple_bank_db -p 5432:$(PGPORT) -e POSTGRES_USER=$(PGUSER) -e POSTGRES_PASSWORD=$(PGPASSWORD) -e POSTGRES_DB=$(PGBASE) -d postgres:14-alpine
+	@docker run --name simple_bank_db --network bank-network -p 5432:$(PGPORT) -e POSTGRES_USER=$(PGUSER) -e POSTGRES_PASSWORD=$(PGPASSWORD) -e POSTGRES_DB=$(PGBASE) -d postgres:14-alpine
 start_postgres:
 	@docker start simple_bank_db
+stop_postgres:
+	@docker stop simple_bank_db
 psql:
 	@PGPASSWORD=$(PGPASSWORD) psql -U $(PGUSER) -h $(PGHOST) -p $(PGPORT) -d $(PGBASE)
 create_db:
