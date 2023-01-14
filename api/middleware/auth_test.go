@@ -29,18 +29,44 @@ func addAuthorization(
 
 func TestAuthMiddleware(t *testing.T) {
 	tests := []struct {
-		name      string
 		setupAuth func(t *testing.T, req *http.Request, tokenMaker token.Maker)
 		checkResp func(t *testing.T, recorder *httptest.ResponseRecorder)
+		name      string
 	}{
 		{
-			name: "ok",
+			name: "Ok",
 			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, req, tokenMaker, authorizationTypeBearer, "bobert", time.Minute)
+				addAuthorization(t, req, tokenMaker, AuthorizationTypeBearer, "bobert", time.Minute)
 			},
 			checkResp: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 				require.Equal(t, `{"status":"ok"}`, recorder.Body.String())
+			},
+		},
+		{
+			name:      "NoAuthorization",
+			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {},
+			checkResp: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name: "UnsupportedAuthorization",
+			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, req, tokenMaker, "anyOtherAuthorizationType", "bobert", time.Minute)
+
+			},
+			checkResp: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name: "Expired",
+			setupAuth: func(t *testing.T, req *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, req, tokenMaker, AuthorizationTypeBearer, "bobert", -time.Minute)
+			},
+			checkResp: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 	}

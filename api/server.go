@@ -55,7 +55,6 @@ func (s *Server) setMiddlewares() {
 		middleware.Recovery(),
 		middleware.CORS(),
 		middleware.Throttling(maxEventsPerSec, maxBurstSize),
-		middleware.Auth(s.tokenMaker),
 		middleware.Errors(),
 	)
 }

@@ -11,9 +11,9 @@ import (
 
 type testUserToken struct {
 	maker    Maker
-	duration time.Duration
 	username string
 	token    string
+	duration time.Duration
 }
 
 func createUserJWTToken(t *testing.T, username string, duration time.Duration) testUserToken {
@@ -38,9 +38,9 @@ func TestCreateJWTToken(t *testing.T) {
 
 func TestValidateJWTToken(t *testing.T) {
 	tests := []struct {
-		name     string
-		user     testUserToken
 		testFunc func(t *testing.T, userToken testUserToken)
+		user     testUserToken
+		name     string
 	}{
 		{
 			name: "valid token",

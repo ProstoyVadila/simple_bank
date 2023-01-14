@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
@@ -75,17 +74,6 @@ func TestUpdateAccount(t *testing.T) {
 	cleanUpAccount(t, account1)
 }
 
-func TestDeleteAccount(t *testing.T) {
-	account1 := createRandomAccount(t)
-	err := testQueries.DeleteAccount(context.Background(), account1.ID)
-	require.NoError(t, err)
-
-	account2, err := testQueries.GetAccount(context.Background(), account1.ID)
-	require.Error(t, err)
-	require.EqualError(t, err, sql.ErrNoRows.Error())
-	require.Empty(t, account2)
-}
-
 func TestListAccounts(t *testing.T) {
 	n := 10
 	accounts1 := make([]Account, n)
@@ -94,16 +82,19 @@ func TestListAccounts(t *testing.T) {
 	}
 
 	args := ListAccountsParams{
-		Limit:  5,
-		Offset: 5,
+		OwnerName: accounts1[0].OwnerName,
+		Limit:     5,
+		Offset:    0,
 	}
 
 	accounts2, err := testQueries.ListAccounts(context.Background(), args)
 	require.NoError(t, err)
-	require.Len(t, accounts2, 5)
+	require.Len(t, accounts2, 1)
+	require.NotEmpty(t, accounts2)
 
 	for _, acc := range accounts2 {
 		require.NotEmpty(t, acc)
+		require.Equal(t, args.OwnerName, acc.OwnerName)
 	}
 	for _, account := range accounts1 {
 		cleanUpAccount(t, account)

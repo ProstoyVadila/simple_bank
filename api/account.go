@@ -4,14 +4,16 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/ProstoyVadila/simple_bank/api/middleware"
 	db "github.com/ProstoyVadila/simple_bank/db/sqlc"
+	"github.com/ProstoyVadila/simple_bank/e"
+	"github.com/ProstoyVadila/simple_bank/token"
 	"github.com/ProstoyVadila/simple_bank/utils"
 	"github.com/gin-gonic/gin"
 )
 
 type createAccountRequest struct {
-	OwnerName string `json:"owner_name" binding:"required"`
-	Currency  string `json:"currency" binding:"required,currency"`
+	Currency string `json:"currency" binding:"required,currency"`
 }
 
 // createAccount creates a new account in db
@@ -22,8 +24,10 @@ func (s *Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
+	// Get the username from the context
+	authPayload := ctx.MustGet(middleware.AuthorizationPayloadKey).(*token.Payload)
 	args := db.CreateAccountParams{
-		OwnerName: req.OwnerName,
+		OwnerName: authPayload.Username,
 		Currency:  req.Currency,
 		Balance:   0,
 	}
@@ -64,6 +68,13 @@ func (s *Server) getAccount(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(middleware.AuthorizationPayloadKey).(*token.Payload)
+	if account.OwnerName != authPayload.Username {
+		err := e.ErrUnauthorized{Msg: "you don't have acount with ID:", Obj: req.ID.String()}
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	ctx.JSON(http.StatusOK, account)
 }
 
@@ -79,9 +90,11 @@ func (s *Server) listAccount(ctx *gin.Context) {
 		return
 	}
 
+	payload := ctx.MustGet(middleware.AuthorizationPayloadKey).(*token.Payload)
 	args := db.ListAccountsParams{
-		Limit:  req.PageSize,
-		Offset: (req.PageID - 1) * req.PageSize,
+		OwnerName: payload.Username,
+		Limit:     req.PageSize,
+		Offset:    (req.PageID - 1) * req.PageSize,
 	}
 	accounts, err := s.store.ListAccounts(ctx, args)
 	if err != nil {
@@ -90,28 +103,4 @@ func (s *Server) listAccount(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, accounts)
-}
-
-type deleteAccountRequest struct {
-	ID utils.UUIDString `uri:"id" binding:"required,uuid"`
-}
-
-func (s *Server) deleteAccount(ctx *gin.Context) {
-	var req deleteAccountRequest
-	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.Error(err)
-		return
-	}
-
-	id, err := req.ID.UUID()
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-	err = s.store.DeleteAccount(ctx, id)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-	ctx.JSON(http.StatusOK, req)
 }
