@@ -13,9 +13,13 @@ type UUIDString string
 func (u *UUIDString) UUID() (uuid.UUID, error) {
 	id, err := uuid.Parse(string(*u))
 	if id == uuid.Nil {
-		return id, e.ErrInvalidID{Id: id.String()}
+		return id, e.ErrInvalidUUID{Id: id.String()}
 	}
 	return id, err
+}
+
+func (u *UUIDString) String() string {
+	return string(*u)
 }
 
 func KindOf(obj interface{}) reflect.Kind {

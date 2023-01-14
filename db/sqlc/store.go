@@ -3,11 +3,8 @@ package db
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 
-	"github.com/ProstoyVadila/simple_bank/e"
-	"github.com/ProstoyVadila/simple_bank/utils"
 	"github.com/google/uuid"
 )
 
@@ -52,10 +49,10 @@ func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 
 // TransferTxParams contains the input params if the transfer tansaction
 type TransferTxParams struct {
-	Currency      string    `json:"currency"`
-	Amount        int64     `json:"amount"`
-	FromAccountID uuid.UUID `json:"from_account_id"`
-	ToAccountID   uuid.UUID `json:"to_account_id"`
+	Currency    string  `json:"currency"`
+	Amount      int64   `json:"amount"`
+	FromAccount Account `json:"from_account"`
+	ToAccount   Account `json:"to_account"`
 }
 
 // TransferTxResult is the result of the transfer transaction
@@ -76,38 +73,18 @@ func (store *SQLStore) TransferTx(ctx context.Context, args TransferTxParams) (T
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
-		// Checking an existence of accounts
-		fromAccount, err := q.GetAccount(ctx, args.FromAccountID)
-		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				return e.ErrEntityNotFound{EntityName: "account"}
-			}
-			return err
-		}
-		toAccount, err := q.GetAccount(ctx, args.ToAccountID)
-		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				return e.ErrEntityNotFound{EntityName: "account"}
-			}
-			return err
-		}
-
-		// Checking a same currency type
-		if err = utils.ValidateCurrency(args.Currency, fromAccount.Currency, toAccount.Currency); err != nil {
-			return err
-		}
 		result.Currency = args.Currency
 
 		// Creating a entries records
 		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
-			AccountID: args.FromAccountID,
+			AccountID: args.FromAccount.ID,
 			Amount:    -args.Amount,
 		})
 		if err != nil {
 			return err
 		}
 		result.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{
-			AccountID: args.ToAccountID,
+			AccountID: args.ToAccount.ID,
 			Amount:    args.Amount,
 		})
 		if err != nil {
@@ -116,12 +93,12 @@ func (store *SQLStore) TransferTx(ctx context.Context, args TransferTxParams) (T
 
 		//  TODO: find out a better way
 		// Avoiding the db deadlock on a cuncurrent "A -> B, B -> A" selecting/updateting
-		if fromAccount.CreatedAt.Before(toAccount.CreatedAt) {
+		if args.FromAccount.CreatedAt.Before(args.ToAccount.CreatedAt) {
 			result.FromAccount, result.ToAccount, err = transferMoney(
 				ctx,
 				q,
-				args.FromAccountID,
-				args.ToAccountID,
+				args.FromAccount.ID,
+				args.ToAccount.ID,
 				-args.Amount,
 				args.Amount,
 			)
@@ -132,8 +109,8 @@ func (store *SQLStore) TransferTx(ctx context.Context, args TransferTxParams) (T
 			result.ToAccount, result.FromAccount, err = transferMoney(
 				ctx,
 				q,
-				args.ToAccountID,
-				args.FromAccountID,
+				args.ToAccount.ID,
+				args.FromAccount.ID,
 				args.Amount,
 				-args.Amount,
 			)
@@ -144,8 +121,8 @@ func (store *SQLStore) TransferTx(ctx context.Context, args TransferTxParams) (T
 
 		// Creating a trasfer record
 		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{
-			FromAccountID: args.FromAccountID,
-			ToAccountID:   args.ToAccountID,
+			FromAccountID: args.FromAccount.ID,
+			ToAccountID:   args.ToAccount.ID,
 			Amount:        args.Amount,
 		})
 		if err != nil {

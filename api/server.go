@@ -10,7 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// TODO: move to config
 const (
+	// maxEventsPerSec is the maximum number of events that can be sent to the server per second.
 	maxEventsPerSec = 1000
 	maxBurstSize    = 20
 )
@@ -49,8 +51,8 @@ func (s *Server) Start(address string) error {
 // setMiddlewares adds middlewares to router
 func (s *Server) setMiddlewares() {
 	s.router.Use(
-		middleware.Recovery(),
 		middleware.DefaultLogger(),
+		middleware.Recovery(),
 		middleware.CORS(),
 		middleware.Throttling(maxEventsPerSec, maxBurstSize),
 		middleware.Errors(),
