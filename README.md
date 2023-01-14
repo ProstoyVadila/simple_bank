@@ -22,10 +22,11 @@ make run
 3. Add throttle middleware by ip.
 4. Change primary key from username to uuid id for users.
 5. Remove custom UUIDString type to uuid.UUID. (figure out with gin bug)
-6. Add graceful shutdown.
-7. Add more handlers and tests.
-8. Figure out with trusted proxies.
-9. Check sqlc for a more complicated queries.
-10. Add monitoring.
-11. Add swagger.
-12. Add fieldalignment as git pre-hook?
+6. Improve docker compose file.
+7. Add graceful shutdown.
+8. Add more handlers and tests.
+9. Figure out with trusted proxies.
+10. Check sqlc for a more complicated queries.
+11. Add monitoring.
+12. Add swagger.
+13. Add fieldalignment as git pre-hook?
