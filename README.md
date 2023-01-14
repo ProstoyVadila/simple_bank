@@ -8,4 +8,5 @@
 6. Add graceful shutdown.
 7. Add more handlers and tests.
 8. Check sqlc for a more complicated queries (with join for example).
-9. Add monitoring feature.
+9. Add monitoring.
+10. Add fieldalignment as git pre-hook?
