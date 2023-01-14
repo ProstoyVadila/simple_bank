@@ -2,16 +2,14 @@ package e
 
 import (
 	"fmt"
-
-	"github.com/google/uuid"
 )
 
-type ErrAccountNotFound struct {
-	Id uuid.UUID
+type ErrEntityNotFound struct {
+	EntityName string
 }
 
-func (e ErrAccountNotFound) Error() string {
-	return fmt.Sprintf("Account %v not found", e.Id)
+func (e ErrEntityNotFound) Error() string {
+	return fmt.Sprintf("%v not found", e.EntityName)
 }
 
 type ErrInvalidID struct {

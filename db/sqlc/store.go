@@ -80,14 +80,14 @@ func (store *SQLStore) TransferTx(ctx context.Context, args TransferTxParams) (T
 		fromAccount, err := q.GetAccount(ctx, args.FromAccountID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				return e.ErrAccountNotFound{Id: args.FromAccountID}
+				return e.ErrEntityNotFound{EntityName: "account"}
 			}
 			return err
 		}
 		toAccount, err := q.GetAccount(ctx, args.ToAccountID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				return e.ErrAccountNotFound{Id: args.ToAccountID}
+				return e.ErrEntityNotFound{EntityName: "account"}
 			}
 			return err
 		}

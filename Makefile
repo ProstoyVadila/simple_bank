@@ -7,8 +7,10 @@ package_name=github.com/ProstoyVadila/simple_bank
 check_env:
 	echo $(DB_SOURCE)
 
-postgres:
+run_postgres:
 	@docker run --name simple_bank_db -p 5432:$(PGPORT) -e POSTGRES_USER=$(PGUSER) -e POSTGRES_PASSWORD=$(PGPASSWORD) -e POSTGRES_DB=$(PGBASE) -d postgres:14-alpine
+start_postgres:
+	@docker start simple_bank_db
 psql:
 	@PGPASSWORD=$(PGPASSWORD) psql -U $(PGUSER) -h $(PGHOST) -p $(PGPORT) -d $(PGBASE)
 create_db:
@@ -46,4 +48,4 @@ mocks:
 	mockgen -build_flags=--mod=mod -package mockdb -destination db/mock/store.go $(package_name)/db/sqlc Store
 
 
-.PHONY: postgres createdb dropdb recreate_db psql sqlc migrate_create migrate_up mgirate_down fieldalignment server gen_mocks gen_sqlc
+.PHONY: run_postgres start_postgres createdb dropdb recreate_db psql sqlc migrate_create migrate_up mgirate_down fieldalignment server gen_mocks gen_sqlc

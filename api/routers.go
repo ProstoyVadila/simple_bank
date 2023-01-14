@@ -1,10 +1,7 @@
 package api
 
-import "github.com/gin-gonic/gin"
-
-func (s *Server) setRoutes() *gin.Engine {
-	router := gin.Default()
-
+// setRoutes adds routes to router
+func (s *Server) setRoutes() {
 	// accounts
 	s.router.POST("/accounts", s.createAccount)
 	s.router.GET("/accounts/:id", s.getAccount)
@@ -16,7 +13,6 @@ func (s *Server) setRoutes() *gin.Engine {
 
 	// users
 	s.router.POST("/users", s.createUser)
+	s.router.POST("/users/login", s.loginUser)
 	s.router.GET("/users", s.getUser)
-
-	return router
 }

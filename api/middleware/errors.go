@@ -34,9 +34,11 @@ func Errors() gin.HandlerFunc {
 					case *pq.Error:
 						RespondWithPqError(ctx, err)
 						return
-					case e.ErrAccountNotFound, e.ErrInvalidCurrencyType:
+					// TODO: refactor
+					case e.ErrEntityNotFound, e.ErrInvalidCurrencyType:
 						ctx.JSON(http.StatusForbidden, errorResponse(err))
 						return
+					// TODO: check sql.Errs
 					default:
 						ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 						return
