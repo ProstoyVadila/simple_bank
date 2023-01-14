@@ -31,8 +31,8 @@ func TestCreatePasetoToken(t *testing.T) {
 func TestValidatePasetoToken(t *testing.T) {
 	tests := []struct {
 		testFunc func(t *testing.T, userToken testUserToken)
-		user     testUserToken
 		name     string
+		user     testUserToken
 	}{
 		{
 			name: "valid token",
