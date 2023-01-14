@@ -17,9 +17,10 @@ where id = $1 for no key update;
 
 -- name: ListAccounts :many
 select * from accounts
+where owner_name = $1
 order by created_at
-limit $1
-offset $2;
+limit $2
+offset $3;
 
 -- name: UpdateAccount :one
 update accounts 

@@ -2,7 +2,26 @@ package e
 
 import (
 	"fmt"
+	"net/http"
 )
+
+type ErrUnauthorized struct {
+	Msg string
+	Obj string
+}
+
+func (e ErrUnauthorized) Error() string {
+	if e.Obj == "" && e.Msg == "" {
+		return "Unauthorized"
+	} else if e.Obj == "" {
+		return e.Msg
+	}
+	return fmt.Sprintf(e.Msg, e.Obj)
+}
+
+func (e ErrUnauthorized) StatusCode() int {
+	return http.StatusUnauthorized
+}
 
 type ErrEntityNotFound struct {
 	EntityName string
@@ -12,11 +31,11 @@ func (e ErrEntityNotFound) Error() string {
 	return fmt.Sprintf("%v not found", e.EntityName)
 }
 
-type ErrInvalidID struct {
+type ErrInvalidUUID struct {
 	Id string
 }
 
-func (e ErrInvalidID) Error() string {
+func (e ErrInvalidUUID) Error() string {
 	return fmt.Sprintf("Invalid id format: %v", e.Id)
 }
 
