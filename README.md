@@ -1,4 +1,21 @@
 # Simple bank app
+
+## Description:
+This is a simple bank app with API.
+
+## Purpose
+Refresh my knowledge of Go and also get more understanding and practice of building a web service in Go.
+
+## How to run
+1. Via docker-compose:
+```bash
+docker-compose up
+```
+2. Via makefile:
+```bash
+make run
+```
+
 ### TODO:
 1. Refactor an error handling in some places.
 2. Refactor integration db tests (add full cleanup, suits).
@@ -7,6 +24,8 @@
 5. Remove custom UUIDString type to uuid.UUID. (figure out with gin bug)
 6. Add graceful shutdown.
 7. Add more handlers and tests.
-8. Check sqlc for a more complicated queries (with join for example).
-9. Add monitoring.
-10. Add fieldalignment as git pre-hook?
+8. Figure out with trusted proxies.
+9. Check sqlc for a more complicated queries.
+10. Add monitoring.
+11. Add swagger.
+12. Add fieldalignment as git pre-hook?
