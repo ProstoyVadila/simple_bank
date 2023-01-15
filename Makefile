@@ -4,9 +4,6 @@ scheme?=new_scheme
 package_name=github.com/ProstoyVadila/simple_bank
 
 
-check_env:
-	echo $(DB_SOURCE)
-
 run_postgres:
 	@docker run --name simple_bank_db --network bank-network -p 5432:$(PGPORT) -e POSTGRES_USER=$(PGUSER) -e POSTGRES_PASSWORD=$(PGPASSWORD) -e POSTGRES_DB=$(PGBASE) -d postgres:14-alpine
 start_postgres:
@@ -31,6 +28,8 @@ migrate_down:
 migrate_down_last:
 	@migrate -path db/migrations -database '$(DB_SOURCE)' -verbose down 1
 
+mocks:
+	mockgen -build_flags=--mod=mod -package mockdb -destination db/mock/store.go $(package_name)/db/sqlc Store
 
 gen_sqlc:
 	sqlc generate
@@ -46,8 +45,11 @@ fieldalignment:
 server:
 	@GIN_MODE=release go run main.go
 
-mocks:
-	mockgen -build_flags=--mod=mod -package mockdb -destination db/mock/store.go $(package_name)/db/sqlc Store
+build:
+	@go build -o bin/simple_bank main.go
 
+run: 
+	@docker compose down
+	@docker compose --env-file=$(ENV_FILE) up
 
-.PHONY: run_postgres start_postgres createdb dropdb recreate_db psql sqlc migrate_create migrate_up mgirate_down fieldalignment server gen_mocks gen_sqlc
+.PHONY: run build run_postgres start_postgres createdb dropdb recreate_db psql sqlc migrate_create migrate_up mgirate_down fieldalignment server gen_mocks gen_sqlc
