@@ -3,9 +3,10 @@ services:
     image: postgres:14-alpine
     restart: always
     environment:
-      POSTGRES_PASSWORD: stopmining
-      POSTGRES_USER: admni
-      POSTGRES_DB: data
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_DB: ${PGBASE}
+      POSTGRES_PORT: ${PGPORT}
   app:
     build:
       context: .
@@ -13,8 +14,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-      DB_SOURCE: postgres://admni:stopmining@database:5432/data?sslmode=disable
+      DB_SOURCE: ${DB_SOURCE_DOCKER}
     depends_on:
       - database
-    entrypoint: ["/app/wait-for.sh", "database:5432", "--", "/app/start.sh"]
+    entrypoint: ["/app/wait-for.sh", "database:${PGPORT}", "--", "/app/start.sh"]
     command: ["/app/main"]
