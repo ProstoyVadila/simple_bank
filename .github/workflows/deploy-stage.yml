@@ -6,8 +6,8 @@ on:
     branches: [ "main" ]
 
 env:
-  AWS_REGION : "ap-southeast-1"
-  AWS_ACCOUNT_ID: "032595868992"
+  AWS_REGION : ${{ secrets.AWS_REGION }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
 permissions:
   id-token: write # This is required for requesting the JWT
@@ -36,7 +36,7 @@ jobs:
     - name: Build, tag, and push docker image to Amazon ECR
       env:
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        REPOSITORY: simplebank
+        REPOSITORY: simple_bank
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
