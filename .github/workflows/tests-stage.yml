@@ -18,11 +18,11 @@ jobs:
       postgres:
         image: postgres:14-alpine
         env:
-          POSTGRES_PASSWORD: stopmining
-          POSTGRES_DB: data
-          POSTGRES_USER: admni
+          POSTGRES_PASSWORD: $PGPASSWORK
+          POSTGRES_DB: $PGBASE
+          POSTGRES_USER: $PGUSER
         ports:
-          - 5432:5432
+          - 5432:$PGPORT
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
