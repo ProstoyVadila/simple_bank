@@ -9,8 +9,12 @@ on:
   pull_request:
     branches: [ "main", "develop" ]
 
-jobs:
+env:
+  POSTGRES_PASSWORD: "password"
+  POSTGRES_DB: "data"
+  POSTGRES_USER: "test_user"
 
+jobs:
   tests:
     runs-on: ubuntu-latest
 
@@ -18,9 +22,9 @@ jobs:
       postgres:
         image: postgres:14-alpine
         env:
-          POSTGRES_PASSWORD: stopmining
-          POSTGRES_DB: data
-          POSTGRES_USER: admni
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
         ports:
           - 5432:5432
         # Set health checks to wait until postgres has started
