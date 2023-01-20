@@ -4,7 +4,7 @@
 This is a simple bank app with API.
 
 ## Purpose
-Refresh my knowledge of Go and also get more understanding and practice of building a web service in Go.
+Refresh my knowledge of Go, get more understanding and practice of building a web service in Go, get acquainted with AWS infrastructure and Github Actions.
 
 ## How to run
 1. Via docker-compose:
