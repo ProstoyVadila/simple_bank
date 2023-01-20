@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"os"
 	"time"
 
 	"github.com/spf13/viper"
@@ -17,9 +18,18 @@ type Config struct {
 	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 }
 
+// LoadConfig loads the config file from the given path
 func LoadConfig(path string) (config Config, err error) {
+	// TODO: rewrite this logic to getting filename from flag
+	var filename string
+	if isProduction() {
+		filename = "prod"
+	} else {
+		filename = "dev"
+	}
+
 	viper.AddConfigPath(path)
-	viper.SetConfigName("dev")
+	viper.SetConfigName(filename)
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()
@@ -30,4 +40,12 @@ func LoadConfig(path string) (config Config, err error) {
 
 	err = viper.Unmarshal(&config)
 	return
+}
+
+// isProduction checks if the prod.env file exists in the current directory
+func isProduction() bool {
+	if _, err := os.Stat("prod.env"); err == nil {
+		return true
+	}
+	return false
 }

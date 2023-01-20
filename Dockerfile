@@ -9,7 +9,7 @@ FROM alpine:3.17
 WORKDIR /app
 COPY --from=builder /app/main .
 COPY --from=builder /app/migrate .
-COPY dev.env .
+COPY prod.env .
 COPY scripts/ .
 COPY db/migrations ./migrations
 
